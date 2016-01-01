@@ -1,0 +1,43 @@
+# Feel free to include whatever personal configs you'd like after the [include]
+
+[include]
+  path = .gitconfig.khan
+
+[user]
+	email = wchargin@gmail.com
+	name = William Chargin
+[alias]
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	track = branch --set-upstream-to
+	dup = diff @{u}
+	ls = branch -vv
+	sclean = submodule foreach --recursive git clean -f
+	undo = checkout HEAD^
+	amend = commit --amend
+	br = branch -vv
+	skip = rebase --skip
+	rehard = reset --hard
+	rehardup = reset --hard HEAD^
+	ds = diff --staged
+	df = diff
+	re = rebase
+	ri = rebase -i
+	rabort = rebase --abort
+	rc = rebase --continue
+	mt = mergetool
+	st = status
+	pwd = rev-parse --abbrev-ref HEAD
+	pushup = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+	trackup = !git branch --set-upstream-to origin/$(git rev-parse --abbrev-ref HEAD)
+	showmsg = show --no-patch --pretty=%B
+[push]
+	default = simple
+[core]
+	excludesfile = /home/wchargin/.gitignore_global
+	editor = vim
+[merge]
+    tool = vimdiff
+[diff]
+    tool = vimdiff
+[commit]
+[commit]

@@ -1,0 +1,193 @@
+# Eternal bash history.
+# ---------------------
+# Undocumented feature which sets the size to "unlimited".
+# http://stackoverflow.com/questions/9457233/unlimited-bash-history
+export HISTFILESIZE=
+export HISTSIZE=
+export HISTTIMEFORMAT="[%F %T] "
+# Change the file location because certain bash sessions truncate .bash_history file upon close.
+# http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
+export HISTFILE=~/.bash_eternal_history
+
+# Force prompt to write history after every command.
+# http://superuser.com/questions/20900/bash-history-loss
+PROMPT_COMMAND+="history -a; "
+
+export EDITOR=vim
+
+add_to_path() {
+    if [[ ! "$PATH" == *"$1"* ]]; then
+        if [[ "$2" == "prepend" ]]; then
+            export PATH="$1:$PATH"
+        else
+            export PATH="$PATH:$1"
+        fi
+    fi
+}
+add_to_path "/home/wchargin/bin"        prepend
+add_to_path "/home/wchargin/.cabal/bin" prepend
+add_to_path "/opt/google/appengine"     prepend
+add_to_path "/home/wchargin/npm/bin"    prepend
+
+if [[ -d '/home/wchargin/google-cloud-sdk' ]]; then
+    # The next line updates PATH for the Google Cloud SDK.
+    source '/home/wchargin/google-cloud-sdk/path.bash.inc'
+
+    # The next line enables shell command completion for gcloud.
+    source '/home/wchargin/google-cloud-sdk/completion.bash.inc'
+fi
+
+if [[ -d '/home/wchargin/bash_completions/' ]]; then
+    # look how trusting I am
+    source /home/wchargin/bash_completions/*
+fi
+
+if [[ -d ~/man ]]; then
+    export MANPATH=$MANPATH:~/man/
+fi
+
+# also note .inputrc contains 'set editing-mode: vi'
+set -o vi
+
+bakup () {
+    for arg in "$@"; do
+        cp --no-clobber "$arg" "${arg}.bak"
+    done
+}
+
+alias open=xdg-open
+alias here="open ."
+
+alias cp="cp -i"
+alias mv="mv -i"
+
+# Access schoolwork quickly by class.
+# Usage:
+#   go <class>
+# Example:
+#   go stat312
+function go() {
+    cd "$HOME/Dropbox/school/15/$@"
+}
+function _go() # completion
+{
+    COMPREPLY=($( compgen -o dirnames -W "$(cat ~/Dropbox/school/15/current)" -- $2 ))
+}
+complete -F _go go
+
+# Write notes for today, on "notes_YYYYMMDD.tex,"
+# where YYYYMMDD is the current date.
+# Usage:
+#   notes
+function notes() {
+    vim "notes_$(date +'%Y%m%d').tex"
+}
+
+# base_PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\]'
+PROMPT_COMMAND+='setup_git_vars; '
+PS1=
+PS1+=$'\n'
+PS1+='$(format_exit_code $?)'
+PS1+='$(print_git_branch)'
+PS1+='$(vim_check)'
+PS1+='${debian_chroot:+($debian_chroot)}'
+PS1+='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w'
+PS1+=$'\n'
+PS1+='\$\[\033[00m\] '
+export PS1
+vim_check='if env | grep -q '^VIMRUNTIME'; then tput bold; echo -n "[vim|$SHLVL] "; tput sgr0; fi'
+format_exit_code() {
+    if [[ "$1" -ne 0 ]]; then
+        tput bold
+        tput setaf 1
+        printf '[✕ %3d] ' "$1"
+    else
+        tput setaf 4
+        printf '[✓] '
+    fi
+    tput sgr0
+}
+vim_check() {
+    if env | grep -q '^VIMRUNTIME'; then
+        tput bold
+        printf '[vim|%d] ' "$SHLVL"
+        tput sgr0
+    fi
+}
+setup_git_vars() {
+    if BRANCH="$(git rev-parse --abbrev-ref HEAD 2>&1)"; then
+        GIT=1
+        FULL_SHA="$(git rev-parse HEAD)"
+        SHA="$(<<< "$FULL_SHA" head -c 10)"
+        if ! git symbolic-ref HEAD 1>/dev/null 2>&1; then
+            DETACHED=1
+        else
+            DETACHED=0
+        fi
+    else
+        GIT=0
+        FULL_SHA=
+        SHA=
+        DETACHED=
+    fi
+}
+print_git_branch() {
+    if [[ "$GIT" -eq 1 ]]; then
+        tput bold
+        tput setaf 5
+        if [[ "$DETACHED" -eq 1 ]]; then
+            printf '[%s] ' "$SHA"
+        else
+            printf '[%s] ' "$BRANCH"
+        fi
+        tput sgr0
+    fi
+}
+
+if [[ -f '/home/wchargin/Documents/aufbau/extras/bash_complete/aufbau' ]]; then
+    source ~/Documents/aufbau/extras/bash_complete/aufbau
+fi
+
+go_to_khan_webapp() {
+    [[ $PWD =~ khan/webapp ]] || cd "$HOME/khan/webapp"
+}
+set_title() {
+    # http://askubuntu.com/a/22417
+    printf '\033]0;%s\007' "$1"
+}
+alias kw="go_to_khan_webapp"
+alias ds="set_title 'khan/webapp devshell'; go_to_khan_webapp && tools/devshell.py"
+alias ms="set_title 'khan/webapp server'; go_to_khan_webapp && make serve"
+
+alias py=python
+alias ipy=ipython
+
+alias phab='arc diff HEAD^'
+alias rephab='phab -m rebase'
+
+# default: find * -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null
+# we want to ignore node_modules as well
+export FZF_DEFAULT_COMMAND='git ls-tree -r --name-only HEAD || find * \( -path '\''*/\.*'\'' -o -path '\''node_modules/*'\'' \) -prune -o -type f -print -o -type l -print 2> /dev/null'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+mkcd() {
+    mkdir -p "$@" && cd "$@"
+}
+
+alias racket='rlwrap racket'
+
+vi() {
+    # often I write "vi mfile" by mistake
+    if [[ "$1" =~ m* ]]; then
+        local first="${1#m}"
+        shift
+        vim "$first" "$@"
+    else
+        vim "$@"
+    fi
+}
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+alias unplug='mv ~/.vim/plugged ~/.vim/pluggedold'
+alias replug='[[ -d ~/.vim/pluggedold ]] && rm -rf ~/.vim/plugged && mv ~/.vim/pluggedold ~/.vim/plugged'

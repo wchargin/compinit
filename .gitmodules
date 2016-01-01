@@ -1,0 +1,6 @@
+[submodule "gnome-terminal-colors-solarized"]
+	path = gnome-terminal-colors-solarized
+	url = git://github.com/Anthony25/gnome-terminal-colors-solarized.git
+[submodule "vim-plug"]
+	path = vim-plug
+	url = git://github.com/junegunn/vim-plug.git

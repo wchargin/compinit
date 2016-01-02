@@ -53,7 +53,8 @@ main() {
         case "$1" in
             '-d'|'--dry-run')
                 if [[ -n "$DRY_RUN" ]]; then
-                    printf 'error: %s\n' 'dry-run flag set twice'
+                    tag error
+                    printf 'dry-run flag set twice\n'
                     exit 1
                 else
                     DRY_RUN=1
@@ -65,12 +66,14 @@ main() {
                 ;;
             *)
                 if [[ -n "$install_command" ]]; then
-                    printf 'error: %s\n' 'installation mode set twice'
+                    tag error
+                    printf 'installation mode set twice\n'
                     exit 1
                 else
                     install_command="${INSTALL_MODE_COMMANDS["$1"]}"
                     if [[ -z "$install_command" ]]; then
-                        printf 'Unrecognized argument: %s\n' "$1"
+                        tag error
+                        printf 'unrecognized argument: %s\n' "$1"
                         usage
                         exit 1
                     fi
@@ -81,7 +84,8 @@ main() {
     done
 
     if [[ "$(logname)" != "$(whoami)" ]]; then
-        printf '%s\n' "Please don't run me as root!"
+        tag error
+        printf '%s\n' "please don't run me as root!"
         printf '%s\n' "I'll ask you for sudo access if I need it."
         exit 1
     fi
@@ -278,7 +282,7 @@ install_tex() {
 install_node() {
     section "Installing Node"
 
-    if type node npm >/dev/null 2>&1; then
+    if false && type node npm >/dev/null 2>&1; then
         printf '%s\n' "Both 'node' and 'npm' are already installed:"
         type node npm
         printf '%s\n' 'Skipping this phase of setup.'
@@ -314,7 +318,8 @@ install_node() {
     local node_archive
     node_archive="$(basename "$url")"
     if [[ "$node_archive" != *.tar.gz ]]; then
-        printf 'error: URL must end in .tar.gz\n'
+        tag error
+        printf 'URL must end in .tar.gz\n'
         return 1
     fi
 
@@ -388,7 +393,8 @@ safe_cp() {
     fi
     if [[ -e "$2" ]]; then
         if [[ -z "$generated" && ! -e "$1" ]]; then
-            printf >&2 'error: source "%s" does not exist' "$1"
+            tag error
+            printf 'source "%s" does not exist' "$1"
             return 1
         fi
         tag note
@@ -462,12 +468,16 @@ colored() {
     safe_tput sgr0
 }
 
-# tag: Print a 'warning' or 'note' tag, including a trailing space.
+# tag: Print an 'error', 'warning', or 'note' tag, including a trailing space.
+# example: tag error
 # example: tag warning
 # example: tag note
 tag() {
     local color=
     case "$1" in
+        error)
+            colored "error:" 1 bold
+            ;;
         warning)
             colored "warning:" 5 bold
             ;;

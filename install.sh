@@ -288,12 +288,40 @@ install_node() {
     local dir
     dir="$(mktemp -d)"
     cmd --display-as "mkdir $dir" :
-
-    local node_archive="node-v4.2.4-linux-x64"
-    cmd cp "node/${node_archive}.tar.gz" "$dir"
     cmd pushd "$dir" 2>/dev/null
-    cmd tar xzf "${node_archive}.tar.gz"
-    cmd cd "$node_archive/"
+
+    local url0="https://nodejs.org/dist/v4.2.4/node-v4.2.4-linux-x64.tar.gz"
+    printf 'Please paste the .tar.gz URL of the latest Node release\n'
+    printf '(e.g., %s),\n' "$url0"
+    printf 'which you can find on the https://nodejs.org/ homepage:\n'
+    printf '> '
+
+    local url=
+    if [[ -n "$DRY_RUN" ]]; then
+        colored "(skipping for dry-run)" "$COLOR_COMMAND"
+        printf '\n'
+        url="$url0"
+    else
+        while read -r url; do
+            if [[ -n "$url" ]]; then
+                break
+            else
+                printf '> '
+            fi
+        done
+    fi
+
+    local node_archive
+    node_archive="$(basename "$url")"
+    if [[ "$node_archive" != *.tar.gz ]]; then
+        printf 'error: URL must end in .tar.gz\n'
+        return 1
+    fi
+
+    cmd curl -L "$url" -o "$node_archive"
+
+    cmd tar xzf "${node_archive}"
+    cmd cd "${node_archive%.tar.gz}/"
     cmd mkdir -p "$HOME/bin"
     cmd ./bin/npm set prefix "$HOME"
     cmd ./bin/npm install --global npm

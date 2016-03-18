@@ -14,17 +14,24 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'wchargin/vim-latexsuite', { 'for': 'tex' }
     Plug 'junegunn/rainbow_parentheses.vim'
     Plug 'jiangmiao/auto-pairs', { 'for': 'scheme' }
-    Plug 'wchargin/vim-javascript', { 'branch': 'personal' } |
+    Plug (1 ? 'wchargin/vim-javascript' : '~/git/vim-javascript/'),
+        \ { 'branch': 'personal' } |
         \ Plug 'mxw/vim-jsx'
     Plug 'tpope/vim-markdown', { 'for': 'markdown' }
+    Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
+    Plug 'rust-lang/rust.vim', { 'for': 'rust' }
+    Plug 'jez/vim-better-sml', { 'for': 'sml' }
+    Plug 'epicoxymoron/Vim-MIXAL-Syntax'
     Plug 'altercation/vim-colors-solarized'
     Plug 'bling/vim-airline'
     Plug 'gerw/vim-HiLinkTrace', { 'on': 'HLT' }
+    Plug 'vim-scripts/icalendar.vim'
+    Plug 'junegunn/vader.vim'
     call plug#end()
 else
     echoerr "Missing vim-plug install! Head on over to " .
         \ 'https://github.com/junegunn/vim-plug' . " "
-        \ "to install it, then relaunch vim and run :PlugInstall."
+        \ "to install it, then relaunch vim and run :Initialize."
 endif
 syntax enable
 " }}}
@@ -45,7 +52,9 @@ nnoremap <C-P> :FZF<CR>
 " altercation/vim-colors-solarized {{{
 set background=light
 set t_Co=256
-silent! colorscheme solarized
+if $GIO_LAUNCHED_DESKTOP_FILE !~ 'jetbrains'
+    silent! colorscheme solarized
+endif
 " }}}
 " wchargin/vim-latexsuite {{{
 " Set up LaTeX-Suite / vimLaTeX.
@@ -63,7 +72,7 @@ let g:syntastic_tex_checkers = []  " no signal, all noise
 let g:syntastic_mode_map = {
     \ "mode": "active",
     \ "active_filetypes": [],
-    \ "passive_filetypes": ["racket"] }
+    \ "passive_filetypes": ["racket", "asm"] }
 nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
 " }}}
 " jiangmiao/auto-pairs {{{
@@ -73,8 +82,8 @@ nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
 autocmd! User auto-pairs call remove(g:AutoPairs, "'")
 " }}}
 " mbbill/undotree {{{
-nnoremap <Leader>u :UndotreeToggle<CR>:UndotreeFocus<CR>
-nnoremap <Leader>U :UndotreeFocus<CR>
+" I never use |U| (undo-line) anyway.
+nnoremap U :UndotreeToggle<CR>:UndotreeFocus<CR>
 if has("persistent_undo")
     set undodir=~/.undodir/
     set undofile
@@ -82,6 +91,29 @@ endif
 " }}}
 " bling/vim-airline {{{
 let g:airline_powerline_fonts = 1
+" let g:airline_section_gutter = "%{HaskellCursorType()}%="
+function! HaskellCursorType()
+    if &l:ft != "haskell"
+        return ""
+    else
+        let l:file = expand("%")
+        if l:file == ''
+            return ""
+        endif
+        if !filereadable(l:file)
+            return ""
+        endif
+        let l:line = line('.')
+        let l:col = col('.')
+        let l:cmd = hdevtools#build_command('type', shellescape(l:file) . ' ' . l:line . ' ' . l:col)
+        silent let l:output = system(l:cmd)
+        let l:lines = split(l:output, '\n')
+        if len(l:lines) == 0
+            return "(no type)"
+        endif
+        return matchstr(l:lines[0], '"\zs[^"]\+\ze"')
+    endif
+endfunction
 " }}}
 " }}}
 
@@ -126,6 +158,8 @@ set secure exrc  " per-directory .vimrc files
 set conceallevel=1
 
 digraph .. 8230  " 0x2026 HORIZONTAL ELLIPSIS
+digraph :> 8614  " 0x21A6 RIGHTWARDS ARROW FROM BAR (i.e., \mapsto)
+digraph ?! 8253  " 0x203D INTERROBANG
 
 " Spelling {{{
 
@@ -145,12 +179,15 @@ snoremap <C-K> <Esc>b[sviw<C-G>
 " }}}
 
 " }}}
-" General-purpose remappings {{{
+" General-purpose functions and mappings {{{
 
 " This is the most important mapping in the whole file!
 " The spacebar is big,
 " and you can't bind it to anything more extensible than <Leader>.
 map <Space> <Leader>
+
+" Make it easy to become more efficient.
+command! V tabedit $MYVIMRC
 
 " Saving often is great, and it's easier if it's faster.
 nnoremap <Leader>w :w<CR>
@@ -175,10 +212,13 @@ nnoremap <Leader>x :!<Space>
 vnoremap <Leader>x "zy:! <C-R>=substitute(@z, nr2char(10), '; ', 'g')<CR>
 nnoremap <Leader>X :!<Up>
 
-" Make it easy to become more efficient.
-if !exists(":Vimrc")
-    command Vimrc tabedit $MYVIMRC
-endif
+" Mostly just for fun...
+nnoremap <F3> ggg?G``
+
+" Remove consecutive blank lines.
+" (Useful for cleaning up the results of pre-processing macro expansions,
+" e.g., after 'ghc -E Literate.lhs'.)
+command! Collapse %s/\n\n\n\+//g
 " }}}
 " Statusline setup {{{
 " Some of this borrowed from: http://stackoverflow.com/a/5547968/732016
@@ -202,6 +242,26 @@ set laststatus=2
 if exists(":AirlineRefresh")
     AirlineRefresh
 endif
+" }}}
+" Filetype-sensitive REPL access {{{
+let g:repl_commands_by_filetype = {
+            \ "haskell": ["ghci", "%"],
+            \ "lhaskell": ["ghci", "%"],
+            \ "sml": ["/home/wchargin/bin/smlc", "%"],
+            \ "python": ["ipython"],
+            \ }
+function! EnterRepl()
+    if has_key(g:repl_commands_by_filetype, &ft)
+        let l:cmd_parts = map(copy(g:repl_commands_by_filetype[&ft]),
+                    \ 'shellescape(expand(v:val))')
+        let l:cmd = join(l:cmd_parts)
+        execute "! " . l:cmd
+    else
+        echoerr "File type not present in dictionary: '" . &ft . "'"
+    endif
+endfunction
+command! R :call EnterRepl()
+command! REPL :call EnterRepl()
 " }}}
 
 " System clipboard interaction {{{
@@ -307,8 +367,22 @@ function! ToggleConceal()
         setlocal conceallevel=0
         echo ':setlocal conceallevel=0'
     endif
+    redraw!
 endfunction
 nnoremap <silent> cok :call ToggleConceal()<CR>
+
+" mnemonic: toggle 'Koncealcursor'
+function! ToggleConcealcursor()
+    if &concealcursor == ''
+        setlocal concealcursor+=nvic
+        echo ':setlocal concealcursor+=nvic'
+    else
+        setlocal concealcursor-=nvic
+        echo ':setlocal concealcursor-=nvic'
+    endif
+    redraw!
+endfunction
+nnoremap <silent> coK :call ToggleConcealcursor()<CR>
 
 nnoremap cot :UndotreeToggle<CR>:UndotreeFocus<CR>
 " }}}
@@ -363,7 +437,7 @@ function! OpenBetterFile()
         " Has file extension already
     endif
 
-    for extension in [".tex", ".hs", ".py", ".java", ".js", ".sh"]
+    for extension in [".tex", ".lhs", ".hs", ".py", ".java", ".js", ".sh"]
         let l:extended_name = expand("%:r") . extension
         if filereadable(extended_name)
             execute ':edit ' . fnameescape(extended_name)
@@ -390,7 +464,6 @@ function! MvAndEdit(new_name, force, git)
         \ shellescape(expand("%")) .
         \ " " .
         \ shellescape(a:new_name)
-    echom l:cmd
     call system(l:cmd)
     if v:shell_error != 0
         echoerr l:mvcmd . " exited with error " . v:shell_error . "; aborting"
@@ -409,11 +482,16 @@ command! -bang -nargs=1 -complete=file Gmv call MvAndEdit("<args>", <bang>0, 1)
 "
 " Haskell {{{
 autocmd FileType haskell call FtpluginHaskell()
+autocmd BufRead *.hspp setlocal filetype=haskell
 function! FtpluginHaskell()
     setlocal nospell
     nnoremap <buffer> <Leader>ht :HdevtoolsType<CR>
     nnoremap <buffer> <silent> <Leader>hc :HdevtoolsClear<CR>
     nnoremap <buffer> <silent> <Leader>hi :HdevtoolsInfo<CR>
+    " match a dot, but not multiple (like ...),
+    " and not as part of another operator (as in 'x .^ g')
+    syntax match hsCompositionDot /\.\@<!\.\%(\w\|\s\|$\)\@=/ conceal cchar=∘
+    syntax match hsLambda /\\/ conceal cchar=λ
 endfunction
 " }}}
 " Scheme and Racket {{{
@@ -426,7 +504,6 @@ function! FtpluginScheme()
         \ 'Black',
         \ 'DarkGreen',
         \ 'DarkBlue',
-        \ 'LightGray',
         \ 'DarkMagenta',
     \ ], '[v:val, v:val]')
     let l:colors_dark = map([
@@ -469,6 +546,22 @@ function! FtpluginTex()
         setlocal nonumber
     endif
     "
+    let l:warnings_to_add = ['T1/zi4', 'Font shape', 'Some font shapes']
+    let l:warnings = exists("g:Tex_IgnoredWarnings") ?
+        \ split(g:Tex_IgnoredWarnings, "\n") : []
+    let l:ignore_level = exists("g:Tex_IgnoreLevel") ?
+        \ g:Tex_IgnoreLevel : 0
+    for warning in l:warnings_to_add
+        if index(l:warnings, warning) == -1
+            call insert(l:warnings, warning)
+            let l:ignore_level += 1
+        endif
+    endfor
+    let g:Tex_IgnoredWarnings = join(l:warnings, "\n")
+    let g:Tex_IgnoreLevel = l:ignore_level
+    " Now we need to regenerate 'errorformat':
+    execute "TCLevel " . l:ignore_level
+    "
     nnoremap <silent> <leader>lb :!biber %<<CR>
     nnoremap <silent> <leader>lg :!makeglossaries %<<CR>
     nnoremap <buffer> <leader>lc :!texcount %<CR>
@@ -486,12 +579,13 @@ function! FtpluginTex()
     " Recognize \noun{} as a command;
     " include mappings for insert and visual mode.
     call IMAP("FNO", "\\noun{<++>}<++>", "tex")
-    exec "vnoremap <silent> " . g:Tex_Leader . "no " 
+    exec "vnoremap <silent> " . g:Tex_Leader . "no "
         \ "\<C-\\>\<C-N>:call VEnclose('\\noun{', '}', '\\noun{%', '}')<CR>"
     "
     " for 'exam' class
     let g:tex_items .= '\|\\question\|\\part\|\\choice'
     let g:tex_itemize_env .= '\|questions\|parts\|choices'
+    setlocal indentkeys+==\question
     "
     " Backticks aren't paired delimiters in TeX as they are in most languages
     " (e.g., ES6's string interpolation, Bash's command substitution).
@@ -509,6 +603,12 @@ function! FtpluginTex()
     "
     " Don't warn me about long lines.
     setlocal textwidth=0
+    "
+    " For vim-surround: use ysiwq to add quotes to a word, etc.
+    let b:surround_113 = "``\r''"
+    "
+    let g:Tex_UseMakefile = 0
+    " Concealment {{{
     "
     " Function ConcealMath: Add a TeX math pretty-printing alias
     " Usage: call ConcealMath('cmdName', 'replacement', optSuffix, optPrefix)
@@ -554,6 +654,10 @@ function! FtpluginTex()
     call ConcealMath('niso',        '≇')    " alias for \ncong (from amssymb)
     call ConcealMath('maps',        'ℒ')    " linear maps (for Hom-sets in Vec_k)
     call ConcealMath('powerset',    'P')
+    call ConcealMath('abs',         'ℵ')
+    call ConcealMath('bigO',        '𝓞')
+    call ConcealMath('bigTheta',    'Θ')
+    call ConcealMath('bigOmega',    'Ω')
     "
     " Function ConcealMathbb: Add TeX pretty-printing aliases for blackboard bold.
     " Usage: call ConcealMathbb('normalCharacter', 'doubleStruckCharacter')
@@ -601,12 +705,15 @@ function! FtpluginTex()
             call ConcealMath(a:old, a:new)                      " standalone \N
         endif
     endfunction
+    call ConcealMathbb('A', '𝔸', 0)     " algebraic numbers, usually
+    call ConcealMathbb('B', '𝔹', 0)     " set of Boolean values
     call ConcealMathbb('R', 'ℝ', 1)
     call ConcealMathbb('C', 'ℂ', 1)
     call ConcealMathbb('Q', 'ℚ', 1)
     call ConcealMathbb('Z', 'ℤ', 1)
     call ConcealMathbb('N', 'ℕ', 1)
-    call ConcealMathbb('F', '𝔽', 1)     " (arbitrary field)
+    call ConcealMathbb('F', '𝔽', 1)     " arbitrary field
+    " }}}
 endfunction
 " }}}
 " JavaScript (especially with NPM and Webpack) {{{
@@ -620,9 +727,9 @@ endfunction
 " Java {{{
 autocmd FileType java call FtpluginJava()
 function! FtpluginJava()
-" Ant support for Java files
-set errorformat=%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
-set makeprg=ant\ -find\ build.xml
+    " Ant support for Java files
+    set errorformat=%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
+    set makeprg=ant\ -find\ build.xml
 endfunction
 " }}}
 " Octave {{{
@@ -632,8 +739,19 @@ function! FtpluginOctave()
     command Octave !octave -q %
 endfunction
 " }}}
+" SML {{{
+autocmd FileType sml call FtpluginSml()
+function! FtpluginSml()
+    " snail comments!
+    syntax match smlComment /^\m\s*(\?\zs\*\ze)\@!/ conceal cchar=🐌
+    autocmd BufRead,BufNewFile *.sig set ft=sml
+endfunction
+" }}}
 " Handlebars {{{
 autocmd BufRead,BufNewFile *.handlebars set ft=htmldjango
+" }}}
+" Gradle {{{
+autocmd BufRead,BufNewFile *.gradle set ft=groovy
 " }}}
 " }}}
 

@@ -30,6 +30,8 @@
 	pushup = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
 	trackup = !git branch --set-upstream-to origin/$(git rev-parse --abbrev-ref HEAD)
 	showmsg = show --no-patch --pretty=%B
+	co = checkout
+	ap = add -p
 [push]
 	default = simple
 [core]
@@ -41,3 +43,8 @@
     tool = vimdiff
 [commit]
 [commit]
+[branch]
+	autosetupmerge = always
+	autosetuprebase = always
+[pull]
+	rebase = true

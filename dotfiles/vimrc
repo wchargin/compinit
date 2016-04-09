@@ -179,6 +179,9 @@ set secure exrc  " per-directory .vimrc files
 " this is wonderful for TeX
 set conceallevel=1
 
+" Allow using a Greek keyboard (stolen from :help langmap)
+set langmap=ΑA,ΒB,ΨC,ΔD,ΕE,ΦF,ΓG,ΗH,ΙI,ΞJ,ΚK,ΛL,ΜM,ΝN,ΟO,ΠP,QQ,ΡR,ΣS,ΤT,ΘU,ΩV,WW,ΧX,ΥY,ΖZ,αa,βb,ψc,δd,εe,φf,γg,ηh,ιi,ξj,κk,λl,μm,νn,οo,πp,qq,ρr,σs,τt,θu,ωv,ςw,χx,υy,ζz
+
 digraph .. 8230  " 0x2026 HORIZONTAL ELLIPSIS
 digraph :> 8614  " 0x21A6 RIGHTWARDS ARROW FROM BAR (i.e., \mapsto)
 digraph ?! 8253  " 0x203D INTERROBANG

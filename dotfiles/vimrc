@@ -1,5 +1,27 @@
 set nocompatible
 
+" First time setup? Just run :Initialize<CR> {{{
+
+" We can use '<sfile>' to get the name of the file being sourced,
+" but only at the top level (not within a function),
+" so we bind it to a name here.
+let s:vimrc = expand('<sfile>')
+
+" We have to do an existence check here instead of just a 'function!'
+" because the function sources this file,
+" so if we used 'function!' it would redefine itself and trigger an E127.
+if !exists("*Initialize")
+    function Initialize()
+        PlugUpgrade
+        PlugInstall
+        execute 'source ' . fnameescape(s:vimrc)
+    endfunction
+endif
+
+command! Initialize call Initialize()
+
+" }}}
+
 " Plugin loading with vim-plug {{{
 if filereadable($HOME . '/.vim/autoload/plug.vim')
     let s:vim_plug_directory = $HOME . '/.vim/plugged'

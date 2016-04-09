@@ -94,7 +94,7 @@ let g:syntastic_tex_checkers = []  " no signal, all noise
 let g:syntastic_mode_map = {
     \ "mode": "active",
     \ "active_filetypes": [],
-    \ "passive_filetypes": ["racket", "asm"] }
+    \ "passive_filetypes": ["racket", "asm", "java"] }
 nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
 " }}}
 " jiangmiao/auto-pairs {{{

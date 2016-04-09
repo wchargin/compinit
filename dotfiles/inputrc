@@ -1,1 +1,3 @@
 set editing-mode vi
+Control-k: menu-complete-backward
+Control-j: menu-complete

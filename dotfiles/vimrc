@@ -696,6 +696,8 @@ function! FtpluginTex()
     call ConcealMath('bigO',        '𝓞')
     call ConcealMath('bigTheta',    'Θ')
     call ConcealMath('bigOmega',    'Ω')
+    call ConcealMath('exeq',        '≅')    " extensional equivalence
+    call ConcealMath('redto',       '⇒')    " reduces to
     "
     " Function ConcealMathbb: Add TeX pretty-printing aliases for blackboard bold.
     " Usage: call ConcealMathbb('normalCharacter', 'doubleStruckCharacter')

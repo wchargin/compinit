@@ -500,11 +500,18 @@ command! -bang -nargs=1 -complete=file Mv call MvAndEdit("<args>", <bang>0, 0)
 command! -bang -nargs=1 -complete=file Gmv call MvAndEdit("<args>", <bang>0, 1)
 " }}}
 
+
 " ftplugins {{{
 "
 " ~/.vim/after/ftplugin is a great idea,
 " but if I put everything here I can keep all my changes centralized!
 "
+" Git {{{
+" Show summaries past 50 characters as errors.
+" (This is present in /usr/share/vim/vim74/syntax/gitcommit.vim,
+" but is commented out.)
+autocmd FileType gitcommit hi def link gitcommitOverflow Error
+" }}}
 " Haskell {{{
 autocmd FileType haskell call FtpluginHaskell()
 autocmd BufRead *.hspp setlocal filetype=haskell

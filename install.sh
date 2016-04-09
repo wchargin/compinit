@@ -269,6 +269,7 @@ install_haskell() {
     section "Installing Haskell"
     sudo apt-get install -y haskell-platform
     safe_cp "dotfiles/ghci" "$HOME/.ghci"
+    safe_cp "dotfiles/haskeline" "$HOME/.haskeline"
     cmd cabal install hoogle
 }
 

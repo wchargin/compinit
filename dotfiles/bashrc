@@ -15,19 +15,23 @@ PROMPT_COMMAND+="history -a; "
 
 export EDITOR=vim
 
+# We store the original path before we make any changes
+# so that sourcing this file can be idempotent.
+: "${ORIGINAL_PATH:="$PATH"}"
+PATH="$ORIGINAL_PATH"
 add_to_path() {
-    if [[ ! "$PATH" == *"$1"* ]]; then
-        if [[ "$2" == "prepend" ]]; then
-            export PATH="$1:$PATH"
-        else
-            export PATH="$PATH:$1"
-        fi
+    if [[ "$2" == "prepend" ]]; then
+        export PATH="$1:$PATH"
+    else
+        export PATH="$PATH:$1"
     fi
 }
-add_to_path "/home/wchargin/bin"        prepend
-add_to_path "/home/wchargin/.cabal/bin" prepend
+add_to_path "$HOME/bin"                 prepend
+add_to_path "$HOME/bin/racket/bin"
+add_to_path "$HOME/.cabal/bin"          prepend
 add_to_path "/opt/google/appengine"     prepend
-add_to_path "/home/wchargin/npm/bin"    prepend
+add_to_path "$HOME/npm/bin"             prepend
+add_to_path "$HOME/bin/gradle/bin"
 
 if [[ -d '/home/wchargin/google-cloud-sdk' ]]; then
     # The next line updates PATH for the Google Cloud SDK.
@@ -66,21 +70,67 @@ alias mv="mv -i"
 #   go <class>
 # Example:
 #   go stat312
+GO="$HOME/Dropbox/school/16"
 function go() {
-    cd "$HOME/Dropbox/school/15/$@"
+    cd "$GO/$@"
 }
 function _go() # completion
 {
-    COMPREPLY=($( compgen -o dirnames -W "$(cat ~/Dropbox/school/15/current)" -- $2 ))
+    COMPREPLY=($( compgen -o dirnames -W "$(cat "$GO/current")" -- $2 ))
 }
 complete -F _go go
 
-# Write notes for today, on "notes_YYYYMMDD.tex,"
-# where YYYYMMDD is the current date.
+# Edit the most recent notes file for this week.
+# If no such file exists, edit a new one with today's date.
+#
 # Usage:
 #   notes
-function notes() {
-    vim "notes_$(date +'%Y%m%d').tex"
+#   notes --today
+notes() {
+    if [[ -d "notes" ]]; then
+        cd notes
+    fi
+
+    local format='%Y%m%d'
+    local prefix="notes_"
+    local suffix=".tex"
+
+    local notes_file="${prefix}$(date +"$format")${suffix}"
+    local current_day_of_week="$(date +'%w')"   # 1 = Monday; see 'man date'
+    local seconds_per_day=86400
+    local initial_date="$(date +'%s')"          # current (starting) epoch time
+    for i in $(seq 1 "$current_day_of_week"); do
+        # i = number of days ago (we count backwards in time)
+        local target_date="$(( initial_date - seconds_per_day * (i - 1) ))"
+        local infix="$(date --date="@$target_date" +"$format")"
+        local candidate_file="${prefix}${infix}${suffix}"
+        if [[ -f "$candidate_file" ]]; then
+            notes_file="$candidate_file"
+            break
+        fi
+    done
+
+    # Pre-populate a notes template if the file is new.
+    # Include a jump marker (<++>) to allow easy cursor positioning.
+    if [[ ! -e "$notes_file" ]]; then
+        local formatted_date="$(date +'%e %B %Y' | sed -e 's/^ //' -e 's/ /~/')"
+        # yes I know what a heredoc is, but this requires less escaping
+        {
+            echo '\documentclass{article}'
+            echo
+            echo '\usepackage{wcsetup}'
+            echo '\classnotes{'"$formatted_date"'}'
+            echo
+            echo '\begin{document}'
+            echo
+            echo '\maketitle'
+            echo
+            echo '<++>'
+            echo
+            echo '\end{document}'
+        } >> "$notes_file"
+    fi
+    "$EDITOR" "$notes_file"
 }
 
 # base_PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\]'
@@ -94,7 +144,6 @@ PS1+='${debian_chroot:+($debian_chroot)}'
 PS1+='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w'
 PS1+=$'\n'
 PS1+='\$\[\033[00m\] '
-export PS1
 vim_check='if env | grep -q '^VIMRUNTIME'; then tput bold; echo -n "[vim|$SHLVL] "; tput sgr0; fi'
 format_exit_code() {
     if [[ "$1" -ne 0 ]]; then
@@ -175,6 +224,7 @@ mkcd() {
 }
 
 alias racket='rlwrap racket'
+alias sml='rlwrap sml'
 
 vi() {
     # often I write "vi mfile" by mistake
@@ -189,5 +239,17 @@ vi() {
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-alias unplug='mv ~/.vim/plugged ~/.vim/pluggedold'
-alias replug='[[ -d ~/.vim/pluggedold ]] && rm -rf ~/.vim/plugged && mv ~/.vim/pluggedold ~/.vim/plugged'
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+
+s() {
+    cd "$HOME/sandbox"
+    if [[ $# -gt 0 ]]; then
+        mkcd "$@"
+    fi
+}
+_s() { # completion
+    COMPREPLY=($( compgen -o dirnames -W "$(cd "$HOME/sandbox/"; find * -maxdepth 0 -type d)" -- $2 ))
+}
+complete -F _s s
+
+alias h10='hoogle --count=10'

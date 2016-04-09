@@ -607,6 +607,7 @@ function! FtpluginTex()
     " Command defined in main vimrc file.
     command! -nargs=1 Texdoc !texdoc <q-args>
     noremap <buffer> <leader>lK :Texdoc <cword><CR>
+    setlocal keywordprg=texdoc
     "
     " The default includes environments that I don't use, like $$ and \[\].
     " I've gotten used to align* = 8, so leave that last.

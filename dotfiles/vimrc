@@ -753,6 +753,31 @@ function! FtpluginTex()
     call ConcealMathbb('Z', 'ℤ', 1)
     call ConcealMathbb('N', 'ℕ', 1)
     call ConcealMathbb('F', '𝔽', 1)     " arbitrary field
+    "
+    " Function FindCustomConcealments: Add concealments at runtime.
+    " Look for modeline-like lines of the form
+    "     % conceal: '<target>' '<replacement>'
+    " where <target> is any non-empty string
+    " and <replacement> is any single character.
+    function! FindCustomConcealments()
+        let l:pat =   '\m^\s*\%(\S\+\s\+\)\?' .
+                    \ '\<conceal:\s\+' .
+                    \ "'" . '\([^' . "'" . ']\+\)' . "'" . '\s\+' .
+                    \ "'" . '\([^' . "'" . ']\)'   . "'" . '\s*$'
+        let l:old_line = line('.')
+        let l:old_col = col('.')
+        call cursor(1, 1)
+        let l:at_start = 1
+        let l:base_flags = 'W'
+        while search(l:pat, l:base_flags . (l:at_start ? 'c' : ''))
+            let l:at_start = 0
+            let l:this_line = getline('.')
+            let l:groups = matchlist(l:this_line, l:pat)
+            call ConcealMath(l:groups[1], l:groups[2])
+        endwhile
+        call cursor(l:old_line, l:old_col)
+    endfunction
+    call FindCustomConcealments()
     " }}}
 endfunction
 " }}}

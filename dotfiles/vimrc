@@ -578,7 +578,12 @@ function! FtpluginTex()
         setlocal nonumber
     endif
     "
-    let l:warnings_to_add = ['T1/zi4', 'Font shape', 'Some font shapes']
+    let l:warnings_to_add = [
+                \ 'T1/zi4',
+                \ 'Font shape',
+                \ 'Some font shapes',
+                \ 'Size substitutions with differences',
+                \ ]
     let l:warnings = exists("g:Tex_IgnoredWarnings") ?
         \ split(g:Tex_IgnoredWarnings, "\n") : []
     let l:ignore_level = exists("g:Tex_IgnoreLevel") ?

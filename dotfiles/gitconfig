@@ -14,6 +14,7 @@
 	sclean = submodule foreach --recursive git clean -f
 	undo = checkout HEAD^
 	amend = commit --amend
+	amendc = commit --amend --no-edit
 	br = branch -vv
 	skip = rebase --skip
 	rehard = reset --hard
@@ -32,6 +33,7 @@
 	showmsg = show --no-patch --pretty=%B
 	co = checkout
 	ap = add -p
+	cp = cherry-pick
 [push]
 	default = simple
 [core]

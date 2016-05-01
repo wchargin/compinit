@@ -44,6 +44,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
     Plug 'rust-lang/rust.vim', { 'for': 'rust' }
     Plug 'jez/vim-better-sml', { 'for': 'sml' }
+    Plug 'wlangstroth/vim-racket'
     Plug 'epicoxymoron/Vim-MIXAL-Syntax'
     Plug 'altercation/vim-colors-solarized'
     Plug 'bling/vim-airline'
@@ -282,6 +283,7 @@ let g:repl_commands_by_filetype = {
             \ "lhaskell": ["ghci", "%"],
             \ "sml": ["/home/wchargin/bin/smlc", "%"],
             \ "python": ["ipython"],
+            \ "racket": ["racket", "%"],
             \ }
 function! EnterRepl()
     if has_key(g:repl_commands_by_filetype, &ft)

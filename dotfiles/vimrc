@@ -49,6 +49,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'bling/vim-airline'
     Plug 'gerw/vim-HiLinkTrace', { 'on': 'HLT' }
     Plug 'vim-scripts/icalendar.vim'
+    Plug 'tpope/vim-repeat'
     Plug 'junegunn/vader.vim'
     call plug#end()
 else

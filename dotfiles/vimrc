@@ -527,6 +527,7 @@ autocmd FileType haskell call FtpluginHaskell()
 autocmd BufRead *.hspp setlocal filetype=haskell
 function! FtpluginHaskell()
     setlocal nospell
+    setlocal concealcursor+=nvic
     nnoremap <buffer> <Leader>ht :HdevtoolsType<CR>
     nnoremap <buffer> <silent> <Leader>hc :HdevtoolsClear<CR>
     nnoremap <buffer> <silent> <Leader>hi :HdevtoolsInfo<CR>

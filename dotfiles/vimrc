@@ -32,6 +32,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'tpope/vim-unimpaired'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-fugitive'
+    Plug 'junegunn/vim-easy-align'
     Plug 'mbbill/undotree'
     Plug 'wchargin/vim-latexsuite', { 'for': 'tex' }
     Plug 'junegunn/rainbow_parentheses.vim'
@@ -77,6 +78,12 @@ set t_Co=256
 if $GIO_LAUNCHED_DESKTOP_FILE !~ 'jetbrains'
     silent! colorscheme solarized
 endif
+" }}}
+" junegunn/vim-easy-align {{{
+" save original mapping for |ga| as |gA|
+nnoremap gA ga
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
 " }}}
 " wchargin/vim-latexsuite {{{
 " Set up LaTeX-Suite / vimLaTeX.

@@ -837,4 +837,21 @@ autocmd BufRead,BufNewFile *.gradle set ft=groovy
 " }}}
 " }}}
 
+function! SetArrowsEnabled(enabled)
+    let l:dirs = ['<Left>', '<Right>', '<Up>', '<Down>']
+    if a:enabled
+        for dir in dirs
+            silent! exec 'iunmap ' . dir
+            silent! exec 'unmap ' . dir
+        endfor
+    else
+        for dir in dirs
+            exec 'inoremap ' . dir . ' <NOP>'
+            exec 'noremap ' . dir . ' <NOP>'
+        endfor
+    endif
+endfunction
+command! EnableArrows  :call SetArrowsEnabled(1)
+command! DisableArrows :call SetArrowsEnabled(0)
+
 " vim: foldmethod=marker foldlevel=0

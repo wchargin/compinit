@@ -257,3 +257,7 @@ _s() { # completion
 complete -F _s s
 
 alias h10='hoogle --count=10'
+
+colorgo() {
+    gnugo "$@" | runhaskell /home/wchargin/bin/ColorGo.hs
+}

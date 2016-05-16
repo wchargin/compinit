@@ -1,7 +1,7 @@
 # Feel free to include whatever personal configs you'd like after the [include]
 
 [include]
-  path = .gitconfig.khan
+    path = .gitconfig.khan
 
 [user]
 	email = wchargin@gmail.com

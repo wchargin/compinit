@@ -6,6 +6,7 @@
 [user]
 	email = wchargin@gmail.com
 	name = William Chargin
+	signingKey = E8B5F47F
 [alias]
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 	track = branch --set-upstream-to

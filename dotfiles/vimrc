@@ -284,6 +284,7 @@ let g:repl_commands_by_filetype = {
             \ "sml": ["/home/wchargin/bin/smlc", "%"],
             \ "python": ["ipython"],
             \ "racket": ["racket", "%"],
+            \ "rust": ["cargo", "run"],
             \ }
 function! EnterRepl()
     if has_key(g:repl_commands_by_filetype, &ft)

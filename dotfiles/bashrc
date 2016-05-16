@@ -232,7 +232,7 @@ alias sml='rlwrap sml'
 
 vi() {
     # often I write "vi mfile" by mistake
-    if [[ "$1" =~ m* ]]; then
+    if [[ "$1" =~ m.* ]]; then
         local first="${1#m}"
         shift
         vim "$first" "$@"

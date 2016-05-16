@@ -532,9 +532,14 @@ function! FtpluginHaskell()
     nnoremap <buffer> <Leader>ht :HdevtoolsType<CR>
     nnoremap <buffer> <silent> <Leader>hc :HdevtoolsClear<CR>
     nnoremap <buffer> <silent> <Leader>hi :HdevtoolsInfo<CR>
-    " match a dot, but not multiple (like ...),
-    " and not as part of another operator (as in 'x .^ g')
-    syntax match hsCompositionDot /\.\@<!\.\%(\w\|\s\|$\)\@=/ conceal cchar=∘
+    "
+    " Match a dot, but only when surrounded by whitespace or parentheses.
+    " This is not _strictly_ necessary,
+    " but it is certainly sufficient:
+    " it doesn't conceal qualified paths (Map.lookup)
+    " or ranges ([1..3])
+    " or explicit quantifiers (forall a. a -> a).
+    syntax match hsCompositionDot /\m\%(\s\|(\)\zs\.\ze\%(\s\|)\)/ conceal cchar=∘
     syntax match hsLambda /\\/ conceal cchar=λ
 endfunction
 " }}}

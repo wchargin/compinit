@@ -38,7 +38,7 @@
 [push]
 	default = simple
 [core]
-	excludesfile = /home/wchargin/.gitignore_global
+	excludesFile = /home/wchargin/.gitignore_global
 	editor = vim
 [merge]
     tool = vimdiff
@@ -47,7 +47,7 @@
 [commit]
 [commit]
 [branch]
-	autosetupmerge = always
-	autosetuprebase = always
+	autoSetupMerge = always
+	autoSetupRebase = always
 [pull]
 	rebase = true

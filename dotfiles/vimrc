@@ -29,6 +29,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'terryma/vim-multiple-cursors'
     Plug 'junegunn/fzf', { 'dir': '~/.fzf/', 'do': './install --all' }
     Plug 'scrooloose/syntastic'
+    Plug 'pthrasher/conqueterm-vim'
     Plug 'tpope/vim-unimpaired'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-fugitive'

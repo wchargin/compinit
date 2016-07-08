@@ -443,7 +443,6 @@ function! ToggleConcealcursor()
 endfunction
 nnoremap <silent> coK :call ToggleConcealcursor()<CR>
 
-nnoremap cot :UndotreeToggle<CR>:UndotreeFocus<CR>
 " }}}
 " Terminal emulation (requires ConqueTerm or Neovim) {{{
 if has("nvim")

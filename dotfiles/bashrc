@@ -13,7 +13,8 @@ export HISTFILE=~/.bash_eternal_history
 # http://superuser.com/questions/20900/bash-history-loss
 PROMPT_COMMAND+=" :; history -a; "
 
-export EDITOR=vim
+export EDITOR=nvim
+alias vim=$EDITOR
 
 # We store the original path before we make any changes
 # so that sourcing this file can be idempotent.
@@ -134,7 +135,7 @@ notes() {
             echo '\end{document}'
         } >> "$notes_file"
     fi
-    "$EDITOR" "$notes_file"
+    $EDITOR "$notes_file"
 }
 
 # base_PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\]'
@@ -235,9 +236,9 @@ vi() {
     if [[ "$1" =~ m.* ]]; then
         local first="${1#m}"
         shift
-        vim "$first" "$@"
+        $EDITOR "$first" "$@"
     else
-        vim "$@"
+        $EDITOR "$@"
     fi
 }
 

@@ -39,7 +39,7 @@
 	default = simple
 [core]
 	excludesFile = /home/wchargin/.gitignore_global
-	editor = vim
+	editor = nvim
 [merge]
     tool = vimdiff
 [diff]

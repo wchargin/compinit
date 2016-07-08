@@ -61,7 +61,7 @@ set -o vi
 
 bakup () {
     for arg in "$@"; do
-        cp --no-clobber "$arg" "${arg}.bak"
+        cp -n "$arg" "${arg}.bak"
     done
 }
 

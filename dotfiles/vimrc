@@ -492,13 +492,18 @@ nnoremap <Leader>gl :!git lg<CR>
 nnoremap <Leader>g<Space> :Ggrep<Space>
 vnoremap <Leader>g<Space> "zy:Ggrep <C-R>z
 vnoremap <Leader>g<CR> "zy:Ggrep <C-R>z<CR>
+nnoremap <Leader>g/ :Ggrep <C-R>/
 nnoremap <Leader>gb :Gblame<CR>
-nnoremap <Leader>grp oexec git push origin HEAD:<C-R>=system("git rev-parse --abbrev-ref HEAD")<CR><Esc>dd
+nnoremap <Leader>gra oexec arc amend<ESC>
+nnoremap <Leader>grd oexec arc diff HEAD^<ESC>
+nnoremap <Leader>grm m`Oexec git fetch origin && git merge origin/master && git submodule update --init --recursive<ESC>``
+nnoremap <Leader>grp oexec git push origin HEAD:refs/heads/<C-R>=system("git rev-parse --abbrev-ref HEAD")<CR><Esc>dd
 " }}}
 " Phabricator and Arcanist {{{
-nnoremap <Leader>ad :!arc diff --preview<Space>
-nnoremap <Leader>al :!arc lint<CR>
-nnoremap <Leader>aL :!arc lint %<CR>
+nnoremap <Leader>ad :! arc diff --preview<Space>
+nnoremap <Leader>al :! arc lint<CR>
+nnoremap <Leader>aL :! arc lint %<CR>
+au BufRead,BufNewFile */new-commit set filetype=gitcommit
 " }}}
 
 " OpenBetterFile: fix sloppy command-line autocompletion {{{

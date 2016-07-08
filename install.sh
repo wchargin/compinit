@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # install.sh: Set up a fresh clone from scratch.
 # This script is idempotent.
 # Run with '-d' for dry-run if you so desire.

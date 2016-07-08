@@ -35,6 +35,7 @@
 	co = checkout
 	ap = add -p
 	cp = cherry-pick
+	su = submodule update --init --recursive
 [push]
 	default = simple
 [core]

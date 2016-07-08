@@ -47,7 +47,8 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'wlangstroth/vim-racket'
     Plug 'epicoxymoron/Vim-MIXAL-Syntax'
     Plug 'altercation/vim-colors-solarized'
-    Plug 'bling/vim-airline'
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
     Plug 'gerw/vim-HiLinkTrace', { 'on': 'HLT' }
     Plug 'vim-scripts/icalendar.vim'
     Plug 'tpope/vim-repeat'

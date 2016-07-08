@@ -339,7 +339,7 @@ nnoremap <Leader>v :vsplit<Space>
 nnoremap <Leader>s :split<Space>
 nnoremap <Leader><C-T> :tabe<Space>
 
-" <C-W>x is annoying
+" <C-W>x is annoying, especially on a matric layout keyboard.
 nnoremap <C-W><C-E><C-R> <C-W>x
 
 " Switching tabs is annoying on a matrix layout keyboard,
@@ -420,16 +420,17 @@ set mouse=
 function! ToggleConceal()
     if &conceallevel == 0
         setlocal conceallevel=1
+        redraw!
         echo ':setlocal conceallevel=1'
     else
         setlocal conceallevel=0
+        redraw!
         echo ':setlocal conceallevel=0'
     endif
-    redraw!
 endfunction
 nnoremap <silent> cok :call ToggleConceal()<CR>
 
-" mnemonic: toggle 'Koncealcursor'
+" mnemonic: toggle 'Koncealcursor' ('Koncealkursor'?)
 function! ToggleConcealcursor()
     if &concealcursor == ''
         setlocal concealcursor+=nvic
@@ -460,6 +461,24 @@ else
     nnoremap <Leader>tw :ConqueTermTab bash<CR>
     nnoremap <Leader>tk :bdelete
 endif
+" }}}
+" Toggle arrow keys (when loaning to beginners, to promote good habits) {{{
+function! SetArrowsEnabled(enabled)
+    let l:dirs = ['<Left>', '<Right>', '<Up>', '<Down>']
+    if a:enabled
+        for dir in dirs
+            silent! exec 'iunmap ' . dir
+            silent! exec 'unmap ' . dir
+        endfor
+    else
+        for dir in dirs
+            exec 'inoremap ' . dir . ' <NOP>'
+            exec 'noremap ' . dir . ' <NOP>'
+        endfor
+    endif
+endfunction
+command! EnableArrows  :call SetArrowsEnabled(1)
+command! DisableArrows :call SetArrowsEnabled(0)
 " }}}
 
 " Git {{{
@@ -858,22 +877,5 @@ autocmd BufRead,BufNewFile *.handlebars set ft=htmldjango
 autocmd BufRead,BufNewFile *.gradle set ft=groovy
 " }}}
 " }}}
-
-function! SetArrowsEnabled(enabled)
-    let l:dirs = ['<Left>', '<Right>', '<Up>', '<Down>']
-    if a:enabled
-        for dir in dirs
-            silent! exec 'iunmap ' . dir
-            silent! exec 'unmap ' . dir
-        endfor
-    else
-        for dir in dirs
-            exec 'inoremap ' . dir . ' <NOP>'
-            exec 'noremap ' . dir . ' <NOP>'
-        endfor
-    endif
-endfunction
-command! EnableArrows  :call SetArrowsEnabled(1)
-command! DisableArrows :call SetArrowsEnabled(0)
 
 " vim: foldmethod=marker foldlevel=0

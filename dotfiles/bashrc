@@ -263,3 +263,15 @@ alias h10='hoogle --count=10'
 colorgo() {
     gnugo "$@" | runhaskell /home/wchargin/bin/ColorGo.hs
 }
+
+nth() {
+    if [[ $# -ne 1 ]]; then
+        printf >&2 'usage: nth <fieldno>\n'
+        return 1
+    fi
+    awk "{print \$$1}"
+}
+
+if [ "$PWD" == "$HOME" ]; then
+    go_to_khan_webapp
+fi

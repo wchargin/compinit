@@ -30,6 +30,7 @@ add_to_path() {
 add_to_path "$HOME/bin"                 prepend
 add_to_path "$HOME/bin/racket/bin"
 add_to_path "$HOME/.cabal/bin"          prepend
+add_to_path "$HOME/Library/Haskell/bin" prepend
 add_to_path "/opt/google/appengine"     prepend
 add_to_path "$HOME/npm/bin"             prepend
 add_to_path "$HOME/bin/gradle/bin"

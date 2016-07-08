@@ -44,6 +44,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
     Plug 'rust-lang/rust.vim', { 'for': 'rust' }
     Plug 'jez/vim-better-sml', { 'for': 'sml' }
+    Plug 'klen/python-mode',   { 'for': 'python' }
     Plug 'wlangstroth/vim-racket'
     Plug 'epicoxymoron/Vim-MIXAL-Syntax'
     Plug 'altercation/vim-colors-solarized'
@@ -146,6 +147,11 @@ function! HaskellCursorType()
         return matchstr(l:lines[0], '"\zs[^"]\+\ze"')
     endif
 endfunction
+" }}}
+" klen/python-mode {{{
+let g:pymode_lint = 0
+let g:pymode_lint_on_write = 0
+let g:pymode_trim_whitespaces = 0
 " }}}
 " }}}
 

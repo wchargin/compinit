@@ -264,6 +264,8 @@ colorgo() {
     gnugo "$@" | runhaskell /home/wchargin/bin/ColorGo.hs
 }
 
+export CLICOLOR=yesplz
+
 nth() {
     if [[ $# -ne 1 ]]; then
         printf >&2 'usage: nth <fieldno>\n'

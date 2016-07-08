@@ -161,18 +161,30 @@ set shiftwidth=4
 set tabstop=4
 set softtabstop=4
 
+set foldlevel=99
+
 " Highlight current line and display an 80-column guard
 " (or, whatever textwidth is at)
 set cursorline
 set colorcolumn=+1
 
-set timeoutlen=250
+set nohlsearch  " on by default in neovim; I don't usually want it
+
+if !has("nvim")
+    " In non-neovim, this shortens the dead time delay
+    " after hitting escape to clear vim-multiple-cursors.
+    " But neovim has no delay anyway (yay!!!) so we don't need it.
+    set timeoutlen=250
+end
+
+" The Debian vimrc has this by default, but OS X doesn't. (???)
+set backspace=eol,indent,start
 
 " Warp-speed macro execution (just mash <C-L> if something breaks)
 set lazyredraw
 
 set number
-set relativenumber
+" set relativenumber
 
 set wildmenu
 set wildignore+=*/.git/,*.pdf,*.aux,*.out,*.log
@@ -255,27 +267,30 @@ nnoremap <F3> ggg?G``
 command! Collapse %s/\n\n\n\+//g
 " }}}
 " Statusline setup {{{
-" Some of this borrowed from: http://stackoverflow.com/a/5547968/732016
-set statusline=
-set statusline+=%f\                          " filename
-set statusline+=(%n)                         " buffer number
-set statusline+=%h%m%r%w                     " status flags
-set statusline+=\[%{strlen(&ft)?&ft:'none'}] " file type
-"
-set statusline+=%#warningmsg#
-if exists("*SyntasticStatuslineFlag")
-    set statusline+=%{SyntasticStatuslineFlag()}
-endif
-set statusline+=%*
-"
-set statusline+=%=                           " right align remainder
-set statusline+=%-14(%l,%c%V%)               " line, character
-set statusline+=%<%P                         " file position
-set laststatus=2
 
 if exists(":AirlineRefresh")
     AirlineRefresh
+else
+    " (This does nothing when vim-airline is present.)
+    " Some of this borrowed from: http://stackoverflow.com/a/5547968/732016
+    set statusline=
+    set statusline+=%f\                          " filename
+    set statusline+=(%n)                         " buffer number
+    set statusline+=%h%m%r%w                     " status flags
+    set statusline+=\[%{strlen(&ft)?&ft:'none'}] " file type
+    "
+    set statusline+=%#warningmsg#
+    if exists("*SyntasticStatuslineFlag")
+        set statusline+=%{SyntasticStatuslineFlag()}
+    endif
+    set statusline+=%*
+    "
+    set statusline+=%=                           " right align remainder
+    set statusline+=%-14(%l,%c%V%)               " line, character
+    set statusline+=%<%P                         " file position
+    set laststatus=2
 endif
+
 " }}}
 " Filetype-sensitive REPL access {{{
 let g:repl_commands_by_filetype = {

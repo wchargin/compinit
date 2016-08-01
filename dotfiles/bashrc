@@ -288,3 +288,5 @@ if [ -z "$ALREADY_AUTOCD" ]; then
     export ALREADY_AUTOCD=1
     go_to_khan_webapp
 fi
+
+alias json='python -m json.tool'

@@ -217,8 +217,18 @@ alias ms="set_title 'khan/webapp server'; go_to_khan_webapp && make serve"
 alias py=python
 alias ipy=ipython
 
-alias phab='arc diff HEAD^'
-alias rephab='phab -m rebase'
+review() {
+    if git rev-parse 'HEAD^' >/dev/null 2>/dev/null; then
+        title0="$(git show --no-patch --pretty=%s HEAD)"
+        title1="$(git show --no-patch --pretty=%s HEAD^)"
+        if [[ "$title0" == "$title1" ]]; then
+            printf >&2 'It looks like you forgot to amend?\n'
+            printf >&2 'Both HEAD and HEAD^ have title "%s."\n' "$title0"
+            return 1
+        fi
+    fi
+    arc diff HEAD^ --verbatim
+}
 
 # default: find * -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null
 # we want to ignore node_modules as well

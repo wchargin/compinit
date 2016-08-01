@@ -479,6 +479,9 @@ if has("nvim")
     nnoremap <Leader>tv :vsplit <Bar> terminal<CR>
     nnoremap <Leader>tw :tabnew <Bar> terminal<CR>
     nnoremap <Leader>tk :bdelete
+    function! SplitShell(cmd)
+        exec ":split | terminal " . a:cmd
+    endfunction
 else
     let g:ConqueTerm_CloseOnEnd = 0
     nnoremap <Leader>t<Space> :ConqueTerm bash<CR>
@@ -486,7 +489,13 @@ else
     nnoremap <Leader>tv :ConqueTermVSplit bash<CR>
     nnoremap <Leader>tw :ConqueTermTab bash<CR>
     nnoremap <Leader>tk :bdelete
+    function! SplitShell(cmd)
+        exec ":ConqueTermSplit " . a:cmd
+    endfunction
 endif
+
+" Provide an :Sh alongside vim's :sh.
+command! -nargs=* Shell call SplitShell("<args>")
 " }}}
 " Toggle arrow keys (when loaning to beginners, to promote good habits) {{{
 function! SetArrowsEnabled(enabled)
@@ -508,14 +517,21 @@ command! DisableArrows :call SetArrowsEnabled(0)
 " }}}
 
 " Git {{{
-nnoremap <Leader>gd :!git diff<CR>
-nnoremap <Leader>gD :!git diff --staged<CR>
-nnoremap <Leader>gp :!git add --patch<CR>
-nnoremap <Leader>gs :!git status<CR>
-nnoremap <Leader>go :!git show<CR>
-nnoremap <Leader>gc :!git commit<CR>
-nnoremap <Leader>ga :!git commit --amend<CR>
-nnoremap <Leader>gl :!git lg<CR>
+function! _ShellMap(mode, binding, command)
+    " mode like 'nnoremap'
+    " binding like '<Leader>gx'
+    " command like 'git status'
+    let l:activation = has('nvim') ? ':split <Bar> terminal ' : ':!'
+    exec a:mode . ' ' . a:binding . ' ' . l:activation . a:command
+endfunction
+call _ShellMap('nnoremap', '<Leader>gd', 'git diff<CR>')
+call _ShellMap('nnoremap', '<Leader>gD', 'git diff --staged<CR>')
+call _ShellMap('nnoremap', '<Leader>gp', 'git add --patch<CR>')
+call _ShellMap('nnoremap', '<Leader>gs', 'git status<CR>')
+call _ShellMap('nnoremap', '<Leader>go', 'git show<CR>')
+call _ShellMap('nnoremap', '<Leader>gc', 'git commit<CR>')
+call _ShellMap('nnoremap', '<Leader>ga', 'git commit --amend<CR>')
+call _ShellMap('nnoremap', '<Leader>gl', 'git lg<CR>')
 nnoremap <Leader>g<Space> :Ggrep<Space>
 vnoremap <Leader>g<Space> "zy:Ggrep <C-R>z
 vnoremap <Leader>g<CR> "zy:Ggrep <C-R>z<CR>
@@ -523,13 +539,14 @@ nnoremap <Leader>g/ :Ggrep <C-R>/
 nnoremap <Leader>gb :Gblame<CR>
 nnoremap <Leader>gra oexec arc amend<ESC>
 nnoremap <Leader>grd oexec arc diff HEAD^<ESC>
+nnoremap <Leader>grD oexec arc diff HEAD^ --verbatim<ESC>
 nnoremap <Leader>grm m`Oexec git fetch origin && git merge origin/master && git submodule update --init --recursive<ESC>``
 nnoremap <Leader>grp oexec git push origin HEAD:refs/heads/<C-R>=system("git rev-parse --abbrev-ref HEAD")<CR><Esc>dd
 " }}}
 " Phabricator and Arcanist {{{
-nnoremap <Leader>ad :! arc diff --preview<Space>
-nnoremap <Leader>al :! arc lint<CR>
-nnoremap <Leader>aL :! arc lint %<CR>
+call _ShellMap('nnoremap', '<Leader>ad', 'arc diff --preview<Space>')
+call _ShellMap('nnoremap', '<Leader>al', 'arc lint<CR>')
+call _ShellMap('nnoremap', '<Leader>aL', 'arc lint %<CR>')
 au BufRead,BufNewFile */new-commit set filetype=gitcommit
 " }}}
 
@@ -594,6 +611,9 @@ command! -bang -nargs=1 -complete=file Gmv call MvAndEdit("<args>", <bang>0, 1)
 " (This is present in /usr/share/vim/vim74/syntax/gitcommit.vim,
 " but is commented out.)
 autocmd FileType gitcommit hi def link gitcommitOverflow Error
+if has("nvim")
+    autocmd FileType gitrebase setlocal keywordprg=:Sh\ git\ show
+endif
 " }}}
 " Haskell {{{
 autocmd FileType haskell call FtpluginHaskell()

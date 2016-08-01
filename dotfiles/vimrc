@@ -152,6 +152,10 @@ endfunction
 let g:pymode_lint = 0
 let g:pymode_lint_on_write = 0
 let g:pymode_trim_whitespaces = 0
+
+" Be less strict about holding down modifiers for too long.
+nmap <C-C><C-G> <C-C>g
+
 " }}}
 " }}}
 

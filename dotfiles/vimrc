@@ -156,6 +156,11 @@ let g:pymode_trim_whitespaces = 0
 " Be less strict about holding down modifiers for too long.
 nmap <C-C><C-G> <C-C>g
 
+" Close the preview window with <C-Space>. As a corollary, close it from
+" insert mode with <C-O><C-Space>, which flows very nicely.
+nnoremap <C-Space> :pclose<CR>
+nnoremap <NUL> :pclose<CR>
+
 " }}}
 " }}}
 
@@ -446,6 +451,21 @@ function! ToggleConcealcursor()
     redraw!
 endfunction
 nnoremap <silent> coK :call ToggleConcealcursor()<CR>
+
+" Toggle completion mode preview window
+function! ToggleCompleteOptPreview()
+    let l:opts = split(&completeopt, ',')
+    if index(l:opts, 'preview') >= 0
+        call filter(l:opts, 'v:val != "preview"')
+        pclose
+    else
+        let l:opts = l:opts + ['preview']
+    endif
+    let l:new_value = join(l:opts, ',')
+    echo ':setlocal completeopt=' . l:new_value
+    let &completeopt = l:new_value
+endfunction
+nnoremap <silent> cop :call ToggleCompleteOptPreview()<CR>
 
 " }}}
 " Terminal emulation (requires ConqueTerm or Neovim) {{{

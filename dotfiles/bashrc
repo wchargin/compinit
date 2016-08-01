@@ -284,6 +284,7 @@ nth() {
     awk "{print \$$1}"
 }
 
-if [ "$PWD" == "$HOME" ]; then
+if [ -z "$ALREADY_AUTOCD" ]; then
+    export ALREADY_AUTOCD=1
     go_to_khan_webapp
 fi

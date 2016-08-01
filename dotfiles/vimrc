@@ -234,6 +234,9 @@ noremap z; 1z=
 " Go back to last misspelled word and pick first suggestion.
 inoremap <C-L> <C-G>u<Esc>[smz1z=`]a<C-G>u
 
+" Downcase the most recent word.
+inoremap <C-U> <C-G>u<Esc>vbgu`]a<C-G>u
+
 " Select last misspelled word (typing will edit).
 nnoremap <C-K> <Esc>[sve<C-G>
 snoremap <C-K> <Esc>b[sviw<C-G>

@@ -30,21 +30,20 @@ add_to_path() {
 add_to_path "$HOME/bin"                 prepend
 add_to_path "$HOME/bin/racket/bin"
 add_to_path "$HOME/.cabal/bin"          prepend
-add_to_path "$HOME/Library/Haskell/bin" prepend
 add_to_path "/opt/google/appengine"     prepend
 add_to_path "$HOME/npm/bin"             prepend
 add_to_path "$HOME/bin/gradle/bin"
+add_to_path "$HOME/khan/devtools/arcanist/khan-bin"
+add_to_path "$HOME/khan/devtools/khan-linter/bin"
+add_to_path "$HOME/git/depot_tools"     prepend
 
 if [[ -d '/home/wchargin/.stack/programs/x86_64-linux/ghc-7.10.3/bin/' ]]; then
     add_to_path '/home/wchargin/.stack/programs/x86_64-linux/ghc-7.10.3/bin/' prepend
 fi
 
-if [[ -d '/home/wchargin/google-cloud-sdk' ]]; then
-    # The next line updates PATH for the Google Cloud SDK.
-    source '/home/wchargin/google-cloud-sdk/path.bash.inc'
-
-    # The next line enables shell command completion for gcloud.
-    source '/home/wchargin/google-cloud-sdk/completion.bash.inc'
+if [[ -d '/home/wchargin/bin/google-cloud-sdk' ]]; then
+    source '/home/wchargin/bin/google-cloud-sdk/path.bash.inc'
+    source '/home/wchargin/bin/google-cloud-sdk/completion.bash.inc'
 fi
 
 if [[ -d '/home/wchargin/bash_completions/' ]]; then

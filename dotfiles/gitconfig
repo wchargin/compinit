@@ -53,3 +53,5 @@
 	autoSetupRebase = always
 [pull]
 	rebase = true
+[rerere]
+	enabled = true

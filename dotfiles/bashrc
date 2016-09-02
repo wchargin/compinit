@@ -216,22 +216,12 @@ alias ms="set_title 'khan/webapp server'; go_to_khan_webapp && make serve"
 alias py=python
 alias ipy=ipython
 
-review() {
-    if git rev-parse 'HEAD^' >/dev/null 2>/dev/null; then
-        title0="$(git show --no-patch --pretty=%s HEAD)"
-        title1="$(git show --no-patch --pretty=%s HEAD^)"
-        if [[ "$title0" == "$title1" ]]; then
-            printf >&2 'It looks like you forgot to amend?\n'
-            printf >&2 'Both HEAD and HEAD^ have title "%s."\n' "$title0"
-            return 1
-        fi
-    fi
-    arc diff HEAD^ --verbatim
-}
+alias phab='arc diff HEAD^'
+alias rephab='phab -m rebase'
 
 # default: find * -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null
 # we want to ignore node_modules as well
-export FZF_DEFAULT_COMMAND='(git ls-tree -r --name-only HEAD || find * \( -path '\''*/\.*'\'' -o -path '\''node_modules/*'\'' \) -prune -o -type f -print -o -type l -print ) 2> /dev/null'
+export FZF_DEFAULT_COMMAND='{ git ls-tree -r --name-only HEAD || find * \( -path '\''*/\.*'\'' -o -path '\''node_modules/*'\'' \) -prune -o -type f -print -o -type l -print 2> /dev/null; }'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 mkcd() {

@@ -121,7 +121,7 @@ if has("persistent_undo")
     set undofile
 endif
 " }}}
-" bling/vim-airline {{{
+" vim-airline/vim-airline {{{
 let g:airline_powerline_fonts = 1
 " let g:airline_section_gutter = "%{HaskellCursorType()}%="
 function! HaskellCursorType()

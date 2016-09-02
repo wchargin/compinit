@@ -384,15 +384,33 @@ cnoremap <NUL>     <C-R>=expand("<cword> ")<CR>
 " Source-to-test {{{
 " open foo_test.py from foo.py, or FooTest.hs from Foo.hs,
 " using :tabe <C-T><CR>
+" Defaults to '...Test' if filename has a capital letter,
+" or '...-test' if filename has a hyphen,
+" else '..._test'.
+" This can be changed by filetype with g:test_file_suffixes_by_filetype,
+" a dictionary of shape 'filetype: [lowercase_suffix, uppercase_suffix]'.
+let g:test_file_suffixes_by_filetype = {
+            \ 'haskell': ['spec', 'Spec'],
+            \ 'lhaskell': ['spec', 'Spec'],
+            \ }
+let g:default_test_file_suffixes = ['test', 'Test']
+function! GetTestFileSuffixesForCurrentFiletype()
+    return has_key(g:test_file_suffixes_by_filetype, &ft) ?
+                \ g:test_file_suffixes_by_filetype[&ft] :
+                \ g:default_test_file_suffixes
+endfunction
 function! GetTestFile()
+    let l:bindings = GetTestFileSuffixesForCurrentFiletype()
+    let l:lowercase = l:bindings[0]
+    let l:uppercase = l:bindings[1]
     if expand("%:e") == ""
-        return expand("%") . "_test"
+        return expand("%") . "_" . l:lowercase
     elseif expand("%:t") =~ '\u'
-        let l:suffix = "Test"
+        let l:suffix = l:uppercase
     elseif expand("%:t") =~ '-'
-        let l:suffix = "-test"
+        let l:suffix = "-" . l:lowercase
     else
-        let l:suffix = "_test"
+        let l:suffix = "_" . l:lowercase
     end
     "
     " Try to change a 'src' directory to a 'test' directory
@@ -405,7 +423,14 @@ cnoremap <C-T> <C-R>=GetTestFile()<Enter><Space>
 " open foo.py from foo_test.py, or Foo.hs from FooTest.hs,
 " using :tabe <C-Y><CR> (<C-Y> is right next to <C-T>)
 function! GetCotestFile()
-    let l:trim_test_regex = '\(_test\|-test\|Test\)\>'
+    let l:bindings = GetTestFileSuffixesForCurrentFiletype()
+    let l:lowercase = l:bindings[0]
+    let l:uppercase = l:bindings[1]
+    let l:trim_test_regex = '\(' .
+                \ '_' . l:lowercase . '\|' .
+                \ '-' . l:lowercase . '\|' .
+                \ l:uppercase .
+                \ '\)\>'
     let l:subbed_tail = substitute(expand("%:t"), l:trim_test_regex, '', '')
     let l:tail_processed = expand("%:h") . '/' . l:subbed_tail
     return SubstituteDirectory(l:tail_processed, "test", "src")

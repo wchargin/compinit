@@ -42,7 +42,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'tpope/vim-markdown', { 'for': 'markdown' }
     Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
     Plug 'rust-lang/rust.vim', { 'for': 'rust' }
-    Plug 'jez/vim-better-sml', { 'for': 'sml' }
+    Plug 'wchargin/vim-better-sml', { 'for': 'sml' }
     Plug 'klen/python-mode',   { 'for': 'python' }
     Plug 'wlangstroth/vim-racket'
     Plug 'epicoxymoron/Vim-MIXAL-Syntax'

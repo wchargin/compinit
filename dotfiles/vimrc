@@ -159,7 +159,6 @@ nmap <C-C><C-G> <C-C>g
 " insert mode with <C-O><C-Space>, which flows very nicely.
 nnoremap <C-Space> :pclose<CR>
 nnoremap <NUL> :pclose<CR>
-
 " }}}
 " }}}
 

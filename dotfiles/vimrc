@@ -160,6 +160,9 @@ nmap <C-C><C-G> <C-C>g
 nnoremap <C-Space> :pclose<CR>
 nnoremap <NUL> :pclose<CR>
 " }}}
+" wchargin/vim-better-sml {{{
+let g:sml_greek_tyvar_show_tick = 1
+" }}}
 " }}}
 
 " General settings {{{

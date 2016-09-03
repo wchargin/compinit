@@ -279,3 +279,6 @@ if [ -z "$ALREADY_AUTOCD" ]; then
 fi
 
 alias json='python -m json.tool'
+
+# OPAM configuration
+. /home/wchargin/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true

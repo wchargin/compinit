@@ -253,7 +253,7 @@ snoremap <C-K> <Esc>b[sviw<C-G>
 " This is the most important mapping in the whole file!
 " The spacebar is big,
 " and you can't bind it to anything more extensible than <Leader>.
-map <Space> <Leader>
+let mapleader = ' '
 
 " Make it easy to become more efficient.
 command! V tabedit $MYVIMRC

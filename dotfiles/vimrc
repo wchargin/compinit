@@ -284,6 +284,16 @@ nnoremap <Leader>X :!<Up>
 " Mostly just for fun...
 nnoremap <F3> ggg?G``
 
+" Format text at 72 characters, as recommended by PEP-8. Used for
+" comments and the like.
+function! FormatText()
+    let l:old_tw = &tw
+    let &tw = 72
+    norm gvgq
+    let &tw = l:old_tw
+endfunction
+vnoremap <Leader>c <Esc>:call FormatText()<CR>
+
 " Remove consecutive blank lines.
 " (Useful for cleaning up the results of pre-processing macro expansions,
 " e.g., after 'ghc -E Literate.lhs'.)

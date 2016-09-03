@@ -53,6 +53,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'vim-scripts/icalendar.vim'
     Plug 'tpope/vim-repeat'
     Plug 'junegunn/vader.vim'
+    Plug 'the-lambda-church/merlin', { 'for': 'ocaml', 'rtp': 'vim/merlin/' }
     call plug#end()
 else
     echoerr "Missing vim-plug install! Head on over to " .

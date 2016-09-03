@@ -709,6 +709,16 @@ function! FtpluginScheme()
     endif
 endfunction
 " }}}
+" OCaml {{{
+autocmd FileType ocaml call FtpluginOcaml()
+function! FtpluginOcaml()
+    let g:syntastic_ocaml_checkers = ['merlin']
+    setlocal concealcursor+=nvic
+    nnoremap <buffer> <Leader>ht :MerlinTypeOf<CR>
+    nnoremap <buffer> <silent> <Leader>hc :MerlinClearEnclosing<CR>
+    nnoremap <buffer> <C-C>g :MerlinLocate<CR>
+endfunction
+" }}}
 " TeX and LaTeX {{{
 autocmd FileType tex call FtpluginTex()
 function! FtpluginTex()

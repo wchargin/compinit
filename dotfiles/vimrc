@@ -558,7 +558,7 @@ else
 endif
 
 " Provide an :Sh alongside vim's :sh.
-command! -nargs=* Shell call SplitShell("<args>")
+command! -nargs=* -complete=shellcmd Shell call SplitShell("<args>")
 " }}}
 " Toggle arrow keys (when loaning to beginners, to promote good habits) {{{
 function! SetArrowsEnabled(enabled)

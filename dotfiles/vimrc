@@ -982,6 +982,13 @@ function! FtpluginJavascript()
     nnoremap <buffer> <Leader>W :w <Bar> ! touch %<CR><Space>
 endfunction
 " }}}
+" JSON {{{
+autocmd FileType json call FtpluginJson()
+function! FtpluginJson()
+    " Who thought it was a good idea to make quotes invisible??!
+    setlocal conceallevel=0
+endfunction
+" }}}
 " Java {{{
 autocmd FileType java call FtpluginJava()
 function! FtpluginJava()

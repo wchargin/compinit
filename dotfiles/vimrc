@@ -73,6 +73,14 @@ else
 endif
 syntax enable
 " }}}
+
+" Leader setup {{{
+" This is the most important mapping in the whole file!
+" The spacebar is big,
+" and you can't bind it to anything more extensible than <Leader>.
+let mapleader = ' '
+" }}}
+"
 " Configuration for some vim-plug plugins {{{
 " terryma/vim-multiple-cursors {{{
 let g:multi_cursor_exit_from_insert_mode = 0
@@ -265,11 +273,6 @@ snoremap <C-K> <Esc>b[sviw<C-G>
 
 " }}}
 " General-purpose functions and mappings {{{
-
-" This is the most important mapping in the whole file!
-" The spacebar is big,
-" and you can't bind it to anything more extensible than <Leader>.
-let mapleader = ' '
 
 " Make it easy to become more efficient.
 command! V tabedit $MYVIMRC

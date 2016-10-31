@@ -294,3 +294,13 @@ xterm-256color-italic|xterm with 256 colors and italic,
     use=xterm-256color,
 EOF
 }
+
+rm() {
+    for arg in "$@"; do
+        if [[ "$arg" =~ (.*/)?.git/?$ ]]; then
+            printf "Refusing to rm %s; use 'command rm' if you really want to\n" "$arg"
+            return 99
+        fi
+    done
+    command rm "$@"
+}

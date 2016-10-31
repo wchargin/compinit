@@ -37,7 +37,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'wchargin/vim-latexsuite', { 'for': 'tex' }
     Plug 'junegunn/rainbow_parentheses.vim'
     Plug 'jiangmiao/auto-pairs', { 'for': 'scheme' }
-    Plug 'pangloss/vim-javascript'
+    Plug 'wchargin/vim-javascript', { 'branch': 'personal' }
     Plug 'mxw/vim-jsx'
     Plug 'tpope/vim-markdown', { 'for': 'markdown' }
     Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }

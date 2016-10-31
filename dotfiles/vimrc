@@ -99,6 +99,9 @@ endif
 nnoremap gA ga
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
+let g:easy_align_delimiters = {
+\ '>': { 'pattern': '->\|=>\|>>\|>' },
+\ }
 " }}}
 " wchargin/vim-latexsuite {{{
 " Set up LaTeX-Suite / vimLaTeX.
@@ -116,7 +119,8 @@ let g:syntastic_tex_checkers             = []  " no signal, all noise
 let g:syntastic_mode_map = {
     \ "mode": "active",
     \ "active_filetypes": [],
-    \ "passive_filetypes": ["racket", "asm", "java", "html"] }
+    \ "passive_filetypes":
+    \ ["racket", "asm", "java", "html", "python", "lex", "yacc"] }
 nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
 " }}}
 " jiangmiao/auto-pairs {{{
@@ -994,10 +998,9 @@ endfunction
 " }}}
 " SML {{{
 autocmd FileType sml call FtpluginSml()
+autocmd BufRead,BufNewFile *.sig set ft=sml
 function! FtpluginSml()
-    " snail comments!
-    syntax match smlComment /^\m\s*(\?\zs\*\ze)\@!/ conceal cchar=🐌
-    autocmd BufRead,BufNewFile *.sig set ft=sml
+    syntax match smlOperator /\w\@<!o\w\@!/ conceal cchar=∘
 endfunction
 " }}}
 " Handlebars {{{

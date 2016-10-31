@@ -815,7 +815,7 @@ function! FtpluginTex()
     "
     " for 'exam' class
     let g:tex_items .= '\|\\question\|\\part\|\\choice'
-    let g:tex_itemize_env .= '\|questions\|parts\|choices'
+    let g:tex_itemize_env .= '\|questions\|parts\|choices\|subproblems'
     setlocal indentkeys+==\question
     "
     " Backticks aren't paired delimiters in TeX as they are in most languages

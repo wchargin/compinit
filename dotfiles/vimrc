@@ -254,6 +254,7 @@ set langmap=ΑA,ΒB,ΨC,ΔD,ΕE,ΦF,ΓG,ΗH,ΙI,ΞJ,ΚK,ΛL,ΜM,ΝN,ΟO,ΠP,QQ,�
 digraph .. 8230  " 0x2026 HORIZONTAL ELLIPSIS
 digraph :> 8614  " 0x21A6 RIGHTWARDS ARROW FROM BAR (i.e., \mapsto)
 digraph ?! 8253  " 0x203D INTERROBANG
+digraph .B 8226  " 0x2022 BULLET
 
 " Spelling {{{
 

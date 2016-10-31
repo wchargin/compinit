@@ -53,7 +53,18 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'vim-scripts/icalendar.vim'
     Plug 'tpope/vim-repeat'
     Plug 'junegunn/vader.vim'
-    Plug 'the-lambda-church/merlin', { 'for': 'ocaml', 'rtp': 'vim/merlin/' }
+    Plug 'wchargin/merlin', {
+                \ 'as': 'merlin-vimbufsync',
+                \ 'for': 'ocaml',
+                \ 'rtp': 'vim/vimbufsync/',
+                \ 'branch': 'v2.3.1a'
+                \}
+    Plug 'wchargin/merlin', {
+                \ 'as': 'merlin-primary',
+                \ 'for': 'ocaml',
+                \ 'rtp': 'vim/merlin/',
+                \ 'branch': 'v2.3.1a'
+                \}
     call plug#end()
 else
     echoerr "Missing vim-plug install! Head on over to " .
@@ -602,7 +613,7 @@ function! OpenBetterFile()
         " Has file extension already
     endif
 
-    for extension in [".tex", ".lhs", ".hs", ".py", ".java", ".js", ".sh"]
+    for extension in [".tex", ".lhs", ".hs", ".py", ".java", ".js", ".sh", ".ml"]
         let l:extended_name = expand("%:r") . extension
         if filereadable(extended_name)
             execute ':edit ' . fnameescape(extended_name)
@@ -711,12 +722,23 @@ endfunction
 " }}}
 " OCaml {{{
 autocmd FileType ocaml call FtpluginOcaml()
+autocmd BufRead,BufNewFile *.mll set ft=lex
+autocmd BufRead,BufNewFile *.mly set ft=yacc
 function! FtpluginOcaml()
     let g:syntastic_ocaml_checkers = ['merlin']
     setlocal concealcursor+=nvic
-    nnoremap <buffer> <Leader>ht :MerlinTypeOf<CR>
-    nnoremap <buffer> <silent> <Leader>hc :MerlinClearEnclosing<CR>
+    nnoremap <buffer> <Leader>od :MerlinDestruct<CR>
+    nnoremap <buffer> <Leader>ot :MerlinTypeOf<CR>
+    nnoremap <buffer> <Leader>ok :MerlinGrowEnclosing<CR>
+    nnoremap <buffer> <Leader>oj :MerlinShrinkEnclosing<CR>
+    nnoremap <buffer> <Leader>oc :MerlinClearEnclosing<CR>
+    vnoremap <buffer> <Leader>ot :MerlinTypeOfSel<CR>
+    nnoremap <buffer> <silent> <Leader>ho :MerlinClearEnclosing<CR>
     nnoremap <buffer> <C-C>g :MerlinLocate<CR>
+
+    " OCaml tries to omap, vmap, and nmap "%" to some language-specific
+    " thing...but it really doesn't work very well. Kill it!
+    silent! unmap %
 endfunction
 " }}}
 " TeX and LaTeX {{{

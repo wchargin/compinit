@@ -282,3 +282,15 @@ alias json='python -m json.tool'
 
 # OPAM configuration
 . /home/wchargin/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+
+# Use a terminal with support for italic colors. If this creates
+# problems, run set_up_italics.
+export TERM=xterm-256color-italic
+set_up_italics() {
+    # https://gist.githubusercontent.com/sos4nt/3187620/raw/8e13c1fec5b72d415ed2917590348451de5f8e58/xterm-256color-italic.terminfo
+    tic - << EOF
+xterm-256color-italic|xterm with 256 colors and italic,
+    sitm=\E[3m, ritm=\E[23m,
+    use=xterm-256color,
+EOF
+}

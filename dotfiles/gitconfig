@@ -56,3 +56,5 @@
 	rebase = true
 [rerere]
 	enabled = true
+[rebase]
+	autoSquash = true

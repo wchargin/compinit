@@ -304,3 +304,8 @@ rm() {
     done
     command rm "$@"
 }
+
+fopen() {
+    target="$(set -o pipefail; locate "$@" | fzf)" || return
+    open "$target"
+}

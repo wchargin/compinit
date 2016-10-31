@@ -29,6 +29,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'terryma/vim-multiple-cursors'
     Plug 'junegunn/fzf', { 'dir': '~/.fzf/', 'do': './install --all' }
     Plug 'scrooloose/syntastic'
+    Plug 'scrooloose/nerdtree'
     Plug 'tpope/vim-unimpaired'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-fugitive'
@@ -130,6 +131,9 @@ let g:syntastic_mode_map = {
     \ "passive_filetypes":
     \ ["racket", "asm", "java", "html", "python", "lex", "yacc"] }
 nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
+" }}}
+" scrooloose/nerdtree {{{
+nnoremap <Leader>T :NERDTreeToggle<CR>
 " }}}
 " jiangmiao/auto-pairs {{{
 " Single quotes are more trouble than they're worth,

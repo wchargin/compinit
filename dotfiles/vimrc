@@ -977,6 +977,13 @@ function! FtpluginJava()
     set errorformat=%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
     set makeprg=ant\ -find\ build.xml
 endfunction
+" C0 {{{
+au BufRead,BufNewFile *.h0 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l1 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l2 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l3 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l4 setlocal cindent syntax=c
+" }}}
 " }}}
 " Octave {{{
 autocmd FileType matlab,octave call FtpluginOctave()

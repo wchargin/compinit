@@ -602,17 +602,23 @@ command! DisableArrows :call SetArrowsEnabled(0)
 function! _ShellMap(mode, binding, command)
     " mode like 'nnoremap'
     " binding like '<Leader>gx'
-    " command like 'git status'
+    " command like 'git status<CR>'
     let l:activation = has('nvim') ? ':split <Bar> terminal ' : ':!'
     exec a:mode . ' ' . a:binding . ' ' . l:activation . a:command
 endfunction
 call _ShellMap('nnoremap', '<Leader>gd', 'git diff<CR>')
 call _ShellMap('nnoremap', '<Leader>gD', 'git diff --staged<CR>')
 call _ShellMap('nnoremap', '<Leader>gp', 'git add --patch<CR>')
-call _ShellMap('nnoremap', '<Leader>gs', 'git status<CR>')
 call _ShellMap('nnoremap', '<Leader>go', 'git show<CR>')
-call _ShellMap('nnoremap', '<Leader>gc', 'git commit<CR>')
-call _ShellMap('nnoremap', '<Leader>ga', 'git commit --amend<CR>')
+if has_key(plugs, 'vim-fugitive')
+    nnoremap <Leader>gs :Gstatus<CR>
+    nnoremap <Leader>gc :Gcommit<CR>
+    nnoremap <Leader>ga :Gcommit --amend<CR>
+else
+    call _ShellMap('nnoremap', '<Leader>gs', 'git status<CR>')
+    call _ShellMap('nnoremap', '<Leader>gc', 'git commit<CR>')
+    call _ShellMap('nnoremap', '<Leader>ga', 'git commit --amend<CR>')
+endif
 call _ShellMap('nnoremap', '<Leader>gl', 'git lg<CR>')
 nnoremap <Leader>g<Space> :Ggrep<Space>
 vnoremap <Leader>g<Space> "zy:Ggrep <C-R>z

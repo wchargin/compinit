@@ -838,7 +838,7 @@ function! FtpluginTex()
         \ "\<C-\\>\<C-N>:call VEnclose('\\noun{', '}', '\\noun{%', '}')<CR>"
     "
     " for 'exam' class
-    let g:tex_items .= '\|\\question\|\\part\|\\choice'
+    let g:tex_items .= '\|\\question\|\\part\>\|\\choice'
     let g:tex_itemize_env .= '\|questions\|parts\|choices\|subproblems'
     setlocal indentkeys+==\question
     "

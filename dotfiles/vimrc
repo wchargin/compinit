@@ -339,7 +339,7 @@ function! FormatText()
     norm gvgq
     let &tw = l:old_tw
 endfunction
-vnoremap <Leader>c <Esc>:call FormatText()<CR>
+vnoremap <Leader>f <Esc>:call FormatText()<CR>
 
 " Remove consecutive blank lines.
 " (Useful for cleaning up the results of pre-processing macro expansions,

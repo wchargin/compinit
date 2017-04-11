@@ -138,6 +138,7 @@ nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
 " }}}
 " scrooloose/nerdtree {{{
 nnoremap <Leader>T :NERDTreeToggle<CR>
+let g:NERDTreeHijackNetrw = 0
 " }}}
 " jiangmiao/auto-pairs {{{
 " Single quotes are more trouble than they're worth,
@@ -180,7 +181,7 @@ function! HaskellCursorType()
 endfunction
 " }}}
 " klen/python-mode {{{
-let g:pymode_lint = 0
+let g:pymode_lint = 1
 let g:pymode_lint_on_write = 0
 let g:pymode_trim_whitespaces = 0
 

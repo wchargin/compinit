@@ -283,6 +283,10 @@ highlight clear SpellCap
 " Shortcut for "pick first spelling suggestion."
 noremap z; 1z=
 
+" Edit the spellfile.
+" TODO: Find some way to locate this file automatically...
+nnoremap <Leader>z<Space> :tabe ~/.config/nvim/spell/en.utf-8.add<CR>
+
 " Go back to last misspelled word and pick first suggestion.
 inoremap <C-L> <C-G>u<Esc>[smz1z=`]a<C-G>u
 

@@ -261,6 +261,20 @@ digraph :> 8614  " 0x21A6 RIGHTWARDS ARROW FROM BAR (i.e., \mapsto)
 digraph ?! 8253  " 0x203D INTERROBANG
 digraph .B 8226  " 0x2022 BULLET
 
+" Digraphs for unicode superscripts and subscripts
+let s:digit = 0
+function! MakeDigraph(digraph, codepoint)
+    exec 'digraph ' . a:digraph . ' ' a:codepoint
+endfunction
+while s:digit <= 9
+    call MakeDigraph("^" . s:digit, 8304 + s:digit)  " 0x207n SUPERSCRIPT <n>
+    call MakeDigraph("_" . s:digit, 8320 + s:digit)  " 0x208n SUBSCRIPT <n>
+    let s:digit += 1
+endwhile
+call MakeDigraph("^1", 185)  " 0x00B9 SUPERSCRIPT ONE   (special case)
+call MakeDigraph("^2", 178)  " 0x00B2 SUPERSCRIPT TWO   (special case)
+call MakeDigraph("^3", 179)  " 0x00B3 SUPERSCRIPT THREE (special case)
+
 " Spelling {{{
 
 setlocal spell spelllang=en_us

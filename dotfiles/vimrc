@@ -912,7 +912,14 @@ function! FtpluginTex()
     call ConcealMath('niso',        '≇')    " alias for \ncong (from amssymb)
     call ConcealMath('maps',        'ℒ')    " linear maps (for Hom-sets in Vec_k)
     call ConcealMath('powerset',    'P')
-    call ConcealMath('abs',         'ℵ')
+    call ConcealMath('abs',         '|')
+    call ConcealMath('norm',        '‖')
+    " TODO: Once vim properly conceals both ends of a region (existing bug
+    " report as of 8.0), replace the above two commands with the
+    " following three:
+    " syn region texMathAbs matchgroup=texStatement start='\\abs\s*{' end='}' contains=@texMathMatchGroup concealends cchar=|
+    " syn region texMathNorm matchgroup=texStatement start='\\norm\s*{' end='}' contains=@texMathMatchGroup concealends cchar=‖
+    " syn cluster texMathZoneGroup add=texMathAbs,texMathNorm
     call ConcealMath('bigO',        '𝓞')
     call ConcealMath('bigTheta',    'Θ')
     call ConcealMath('bigOmega',    'Ω')

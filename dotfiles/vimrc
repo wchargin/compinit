@@ -120,6 +120,7 @@ let g:Tex_CompileRule_pdf = 'pdflatex -shell-escape -interaction=nonstopmode -fi
 let g:tex_flavor='latex'
 " Don't force a redraw when using evince.
 let g:Tex_ViewRule_pdf='evince 2>/dev/null'
+let g:tex_use_sized_delimiters = 1
 " }}}
 " scrooloose/syntastic {{{
 let g:syntastic_always_populate_loc_list = 1

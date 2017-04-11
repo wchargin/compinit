@@ -45,6 +45,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'rust-lang/rust.vim', { 'for': 'rust' }
     Plug 'wchargin/vim-better-sml', { 'for': 'sml' }
     Plug 'klen/python-mode',   { 'for': 'python' }
+    Plug 'wchargin/vim-lilypond', { 'for': 'lilypond' }
     Plug 'wlangstroth/vim-racket'
     Plug 'epicoxymoron/Vim-MIXAL-Syntax'
     Plug 'altercation/vim-colors-solarized'

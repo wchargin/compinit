@@ -115,6 +115,8 @@ let g:easy_align_delimiters = {
 " wchargin/vim-latexsuite {{{
 " Set up LaTeX-Suite / vimLaTeX.
 let g:Tex_DefaultTargetFormat='pdf'
+" Enable shell-escape. (Be careful!)
+let g:Tex_CompileRule_pdf = 'pdflatex -shell-escape -interaction=nonstopmode -file-line-error-style $*'
 let g:tex_flavor='latex'
 " Don't force a redraw when using evince.
 let g:Tex_ViewRule_pdf='evince 2>/dev/null'

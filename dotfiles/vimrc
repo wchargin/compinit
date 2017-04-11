@@ -1009,6 +1009,52 @@ function! FtpluginTex()
     " }}}
 endfunction
 " }}}
+" Lilypond {{{
+autocmd FileType lilypond call FtpluginLilypond()
+function! FtpluginLilypond()
+    nnoremap <buffer> <Leader>ll :make<CR>
+    nnoremap <buffer> <Leader>lv :call OpenLilypondOutput("pdf")<CR>
+    nnoremap <buffer> <Leader>lm :call OpenLilypondOutput("midi")<CR>
+endfunction
+function! OpenLilypondOutput(suffix)
+    let l:file_to_open = FindLilypondOutput(a:suffix)
+    if l:file_to_open != -1
+        silent! exec "! xdg-open " . shellescape(l:file_to_open)
+    endif
+endfunction
+"
+" Function FindLilypondOutput: Guess the output for this file.
+" Usage: echo FindLilypondOutput('pdf')  " or 'midi' or something
+"
+" Assuming that the file currently being edited is a Lilypond file, try
+" to guess its output filename. On error, emit a message and return -1.
+"
+" If we have current directory "/foo/" and are editing "/bar/piano.ly", and
+" this function is called with the argument "pdf", then we'll look at
+" "/bar/piano.pdf", "/bar/*.pdf", "/bar/*-piano.pdf", "/foo/*.pdf", and
+" "/foo/*-piano.pdf", in that order. If any of those matches _exactly_
+" one file, then we return that file. Otherwise, we fail.
+"
+" Using the current directory is not really ideal, because it could have
+" totally spurious matches. But it's probably better than nothing?
+function! FindLilypondOutput(suffix)
+    let l:self_pdf = expand('%<') . '.' . a:suffix
+    if filereadable(l:self_pdf)
+        return l:self_pdf
+    endif
+    for l:basedir in [expand('%:h'), '.']
+        for l:nameglob in ['*', '*-' . fnameescape(expand('%:t:r'))]
+            let l:glob = l:basedir . '/' . l:nameglob . '.' . a:suffix
+            let l:candidates = glob(l:glob, 1, 1)
+            if len(l:candidates) == 1
+                return get(l:candidates, 0)
+            endif
+        endfor
+    endfor
+    echoerr "Unable to locate output for this Lilypond file."
+    return -1
+endfunction
+" }}}
 " JavaScript (especially with NPM and Webpack) {{{
 autocmd FileType javascript call FtpluginJavascript()
 function! FtpluginJavascript()

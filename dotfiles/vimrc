@@ -842,6 +842,9 @@ function! FtpluginTex()
     let g:tex_itemize_env .= '\|questions\|parts\|choices\|subproblems'
     setlocal indentkeys+==\question
     "
+    " For 'cleveref'
+      syn region texRefZone matchgroup=texStatement start="\\v\=[Cc]ref{" end="}\|%stopzone\>" contains=@texRefGroup
+    "
     " Backticks aren't paired delimiters in TeX as they are in most languages
     " (e.g., ES6's string interpolation, Bash's command substitution).
     " We don't want to AutoPair them; LaTeX-Suite handles them correctly.

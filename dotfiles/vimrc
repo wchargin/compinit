@@ -688,7 +688,6 @@ command! -bang -nargs=1 -complete=file Mv call MvAndEdit("<args>", <bang>0, 0)
 command! -bang -nargs=1 -complete=file Gmv call MvAndEdit("<args>", <bang>0, 1)
 " }}}
 
-
 " ftplugins {{{
 "
 " ~/.vim/after/ftplugin is a great idea,

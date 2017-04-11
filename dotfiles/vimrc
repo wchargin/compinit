@@ -1002,6 +1002,9 @@ au BufRead,BufNewFile *.l1 setlocal cindent syntax=c
 au BufRead,BufNewFile *.l2 setlocal cindent syntax=c
 au BufRead,BufNewFile *.l3 setlocal cindent syntax=c
 au BufRead,BufNewFile *.l4 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l5 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l6 setlocal cindent syntax=c
+au BufRead,BufNewFile *.abs setlocal syntax=asm
 " }}}
 " }}}
 " Octave {{{

@@ -425,11 +425,6 @@ nnoremap gL :tabmove +1<CR>
 " }}}
 " Command line file completion {{{
 "
-" Get better tab completion when there's a space on the command.
-" (e.g., ! cd my-docum<Tab> completes, but !cd my-docum<Tab> doesn't)
-" (this one's a bit annoying sometimes)
-cnoremap ! !<Space>
-"
 " Current file and enclosing directory
 cnoremap <C-F> <C-R>=expand("%")<CR>
 cnoremap <C-H> %:h/

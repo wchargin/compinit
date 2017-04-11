@@ -397,14 +397,15 @@ command! REPL :call EnterRepl()
 
 " System clipboard interaction {{{
 "
-" Yank the whole document.
-nnoremap yd ggVG"+y``
-nnoremap yD ggVG"*y``
+" We use <Leader>c for *C*lipboard interaction.
+nnoremap <Leader>cy "+y
+nnoremap <Leader>cY "+Y
+nnoremap <Leader>cp "+p
+nnoremap <Leader>cP "+P
+vnoremap <Leader>cy "+y
 "
-" Now we're screwing with mnemonics (treating 'd' as the opposite of 'p'),
-" but...paste the whole document.
-nnoremap yp "+P
-nnoremap yP "*P
+" It's also very often useful to copy the whole buffer.
+nnoremap <Leader>c<Space> ggVG"+y``
 "
 " }}}
 " Tab and window manipulation {{{

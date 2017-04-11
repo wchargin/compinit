@@ -133,6 +133,7 @@ let g:syntastic_mode_map = {
     \ "active_filetypes": [],
     \ "passive_filetypes":
     \ ["racket", "asm", "java", "html", "python", "lex", "yacc"] }
+let g:syntastic_cpp_compiler_options = ' -std=c++11 -O2 -lm'
 nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
 " }}}
 " scrooloose/nerdtree {{{

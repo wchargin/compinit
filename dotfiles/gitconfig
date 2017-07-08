@@ -1,0 +1,60 @@
+# Feel free to include whatever personal configs you'd like after the [include]
+
+[include]
+    path = .gitconfig.khan
+
+[user]
+	email = wchargin@gmail.com
+	name = William Chargin
+	signingKey = E8B5F47F
+[alias]
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	track = branch --set-upstream-to
+	dup = diff @{u}
+	ls = branch -vv
+	sclean = submodule foreach --recursive git clean -f
+	undo = checkout HEAD^
+	amend = commit --amend
+	amendc = commit --amend --no-edit
+	br = branch -vv
+	skip = rebase --skip
+	rehard = reset --hard
+	rehardup = reset --hard HEAD^
+	ds = diff --staged
+	df = diff
+	re = rebase
+	ri = rebase -i
+	rabort = rebase --abort
+	rc = rebase --continue
+	mt = mergetool
+	st = status
+	pwd = rev-parse --abbrev-ref HEAD
+	pushup = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+	trackup = !git branch --set-upstream-to origin/$(git rev-parse --abbrev-ref HEAD)
+	showmsg = show --no-patch --pretty=%B
+	co = checkout
+	ap = add -p
+	cp = cherry-pick
+	su = submodule update --init --recursive
+    compare = "!f() { inargs=( \"$@\" ); if [ $# -eq 0 ]; then if git symbolic-ref HEAD 1>/dev/null 2>&1; then inargs+=( \"$(git rev-parse --abbrev-ref HEAD 2>&1)\" ); else inargs+=( HEAD ); fi; fi; outargs=( ); for inarg in \"${inargs[@]}\"; do outargs+=( \"${inarg}@{u}..${inarg}\" ); done; echo git ${OP:-lg} \"${outargs[@]}\"; git ${OP:-lg} \"${outargs[@]}\"; }; f"
+	please = push --force-with-lease
+[push]
+	default = simple
+[core]
+	excludesFile = /home/wchargin/.gitignore_global
+	editor = nvim
+[merge]
+    tool = vimdiff
+[diff]
+    tool = vimdiff
+[commit]
+[commit]
+[branch]
+	autoSetupMerge = always
+	autoSetupRebase = always
+[pull]
+	rebase = true
+[rerere]
+	enabled = true
+[rebase]
+	autoSquash = true

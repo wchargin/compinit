@@ -1,0 +1,179 @@
+# Eternal bash history.
+# ---------------------
+# Undocumented feature which sets the size to "unlimited".
+# http://stackoverflow.com/questions/9457233/unlimited-bash-history
+export HISTFILESIZE=
+export HISTSIZE=
+export HISTTIMEFORMAT="[%F %T] "
+# Change the file location because certain bash sessions truncate .bash_history file upon close.
+# http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
+export HISTFILE=~/.bash_eternal_history
+
+# Force prompt to write history after every command.
+# http://superuser.com/questions/20900/bash-history-loss
+PROMPT_COMMAND+="history -a; "
+
+export EDITOR=nvim
+alias vim=$EDITOR
+
+# also note .inputrc contains 'set editing-mode: vi'
+set -o vi
+
+alias open=xdg-open
+alias here="open ."
+
+alias cp="cp -i"
+alias mv="mv -i"
+
+alias py=python
+alias ipy=ipython
+
+alias racket='rlwrap racket'
+alias sml='rlwrap sml'
+
+mkcd() {
+    mkdir -p "$@" && cd "$@"
+}
+
+# Access schoolwork quickly by class.
+# Usage:
+#   go <class>
+# Example:
+#   go stat312
+GO="$HOME/Dropbox/school/16"
+function go() {
+    cd "$GO/$@"
+}
+function _go() # completion
+{
+    COMPREPLY=($( compgen -o dirnames -W "$(cat "$GO/current")" -- $2 ))
+}
+complete -F _go go
+
+nth() {
+    if [[ $# -ne 1 ]]; then
+        printf >&2 'usage: nth <fieldno>\n'
+        return 1
+    fi
+    awk "{print \$$1}"
+}
+
+fopen() {
+    target="$(set -o pipefail; locate "$@" | fzf)" || return
+    open "$target"
+}
+
+alias json='python -m json.tool'
+
+rm() {
+    for arg in "$@"; do
+        if [[ "$arg" =~ (.*/)?.git/?$ ]]; then
+            printf "Refusing to rm %s; use 'command rm' if you really want to\n" "$arg"
+            return 99
+        fi
+    done
+    command rm "$@"
+}
+
+s() {
+    cd "$HOME/sandbox"
+    if [[ $# -gt 0 ]]; then
+        mkcd "$@"
+    fi
+}
+_s() { # completion
+    COMPREPLY=($( compgen -o dirnames -W "$(cd "$HOME/sandbox/"; find * -maxdepth 0 -type d)" -- $2 ))
+}
+complete -F _s s
+
+# base_PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\]'
+PROMPT_COMMAND+='setup_git_vars; '
+PS1=
+PS1+=$'\n'
+PS1+='$(format_exit_code $?)'
+PS1+='$(print_git_branch)'
+PS1+='$(vim_check)'
+PS1+='${debian_chroot:+($debian_chroot)}'
+PS1+='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w'
+PS1+=$'\n'
+PS1+='\$\[\033[00m\] '
+vim_check='if env | grep -q '^VIMRUNTIME'; then tput bold; echo -n "[vim|$SHLVL] "; tput sgr0; fi'
+format_exit_code() {
+    if [[ "$1" -ne 0 ]]; then
+        tput bold
+        tput setaf 1
+        printf '[✕ %3d] ' "$1"
+    else
+        tput setaf 4
+        printf '[✓] '
+    fi
+    tput sgr0
+}
+vim_check() {
+    if env | grep -q '^VIMRUNTIME'; then
+        tput bold
+        printf '[vim|%d] ' "$SHLVL"
+        tput sgr0
+    fi
+}
+setup_git_vars() {
+    if BRANCH="$(git rev-parse --abbrev-ref HEAD 2>&1)"; then
+        GIT=1
+        FULL_SHA="$(git rev-parse HEAD)"
+        SHA="$(<<< "$FULL_SHA" head -c 10)"
+        if ! git symbolic-ref HEAD 1>/dev/null 2>&1; then
+            DETACHED=1
+        else
+            DETACHED=0
+        fi
+    else
+        GIT=0
+        FULL_SHA=
+        SHA=
+        DETACHED=
+    fi
+}
+print_git_branch() {
+    if [[ "$GIT" -eq 1 ]]; then
+        tput bold
+        tput setaf 5
+        if [[ "$DETACHED" -eq 1 ]]; then
+            printf '[%s] ' "$SHA"
+        else
+            printf '[%s] ' "$BRANCH"
+        fi
+        tput sgr0
+    fi
+}
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
+    else
+	color_prompt=
+    fi
+fi
+
+# default: find * -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null
+# we want to ignore node_modules as well
+export FZF_DEFAULT_COMMAND='{ git ls-tree -r --name-only HEAD || find * \( -path '\''*/\.*'\'' -o -path '\''node_modules/*'\'' \) -prune -o -type f -print -o -type l -print 2> /dev/null; }'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+export CLICOLOR=yesplz
+
+# Use a terminal with support for italic colors. If this creates
+# problems, run set_up_italics.
+export TERM=xterm-256color-italic
+set_up_italics() {
+    # https://gist.githubusercontent.com/sos4nt/3187620/raw/8e13c1fec5b72d415ed2917590348451de5f8e58/xterm-256color-italic.terminfo
+    tic - << EOF
+xterm-256color-italic|xterm with 256 colors and italic,
+    sitm=\E[3m, ritm=\E[23m,
+    use=xterm-256color,
+EOF
+}
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

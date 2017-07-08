@@ -1,0 +1,60 @@
+#!/bin/sh
+
+initialize_dropbox() {
+    dropbox start &
+}
+
+initialize_keyboard() {
+    setxkbmap \
+        -option grp:alt_shift_toggle us,el \
+        -option caps:escape \
+        -option terminate:ctrl_alt_bksp \
+        ;
+}
+
+initialize_synaptics() {
+    synclient \
+        'VertScrollDelta=-99' \
+        'HorizScrollDelta=-99' \
+        'HorizTwoFingerScroll=1' \
+        'VertEdgeScroll=0' \
+        'ClickFinger3=2' \
+        'TapButton3=2' \
+        ;
+}
+
+initialize_xmonad() {
+    initialize_dropbox
+    initialize_keyboard
+    initialize_synaptics
+}
+
+wait_for_gnome_panel() {
+    while ! pgrep gnome-panel >/dev/null; do
+        sleep 0.2
+    done
+}
+
+main() {
+    case "$GDMSESSION" in
+        cinnamon|cinnamon2d)
+            # Nothing to do
+            ;;
+        xmonad)
+            initialize_xmonad
+            ;;
+        gnome-xmonad)
+            # If we don't wait for panels to appear, then (a) the
+            # Dropbox daemon will work properly but its icon won't
+            # appear in the panel; (b) the keyboard changes won't take
+            # effect; and (c) the touchpad changes won't take effect.
+            # (Note: it may not be the case that gnome-panel is actually
+            # what we want to wait for, but it seems to work.)
+            wait_for_gnome_panel
+            initialize_xmonad
+            ;;
+    esac
+}
+
+# Startup blocks on this script, so run asynchronously.
+main &

@@ -1,0 +1,6 @@
+.vimrc
+*.pyc
+*.swp
+*.swo
+*.swa
+.ropeproject

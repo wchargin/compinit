@@ -1,0 +1,1114 @@
+set nocompatible
+
+" First time setup? Just run :Initialize<CR> {{{
+
+" We can use '<sfile>' to get the name of the file being sourced,
+" but only at the top level (not within a function),
+" so we bind it to a name here.
+let s:vimrc = expand('<sfile>')
+
+" We have to do an existence check here instead of just a 'function!'
+" because the function sources this file,
+" so if we used 'function!' it would redefine itself and trigger an E127.
+if !exists("*Initialize")
+    function Initialize()
+        PlugUpgrade
+        PlugInstall
+        execute 'source ' . fnameescape(s:vimrc)
+    endfunction
+endif
+
+command! Initialize call Initialize()
+
+" }}}
+
+" Plugin loading with vim-plug {{{
+if filereadable($HOME . '/.vim/autoload/plug.vim')
+    let s:vim_plug_directory = $HOME . '/.vim/plugged'
+    call plug#begin(s:vim_plug_directory)
+    Plug 'terryma/vim-multiple-cursors'
+    Plug 'junegunn/fzf', { 'dir': '~/.fzf/', 'do': './install --all' }
+    Plug 'scrooloose/syntastic'
+    Plug 'scrooloose/nerdtree'
+    Plug 'tpope/vim-unimpaired'
+    Plug 'tpope/vim-eunuch'
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-fugitive'
+    Plug 'junegunn/vim-easy-align'
+    Plug 'mbbill/undotree'
+    Plug 'wchargin/vim-latexsuite', { 'for': 'tex' }
+    Plug 'junegunn/rainbow_parentheses.vim'
+    Plug 'jiangmiao/auto-pairs', { 'for': 'scheme' }
+    Plug 'wchargin/vim-javascript', { 'branch': 'personal' }
+    Plug 'mxw/vim-jsx'
+    Plug 'tpope/vim-markdown', { 'for': 'markdown' }
+    Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
+    Plug 'rust-lang/rust.vim', { 'for': 'rust' }
+    Plug 'wchargin/vim-better-sml', { 'for': 'sml' }
+    Plug 'klen/python-mode',   { 'for': 'python' }
+    Plug 'wchargin/vim-lilypond', { 'for': 'lilypond' }
+    Plug 'wlangstroth/vim-racket'
+    Plug 'epicoxymoron/Vim-MIXAL-Syntax'
+    Plug 'altercation/vim-colors-solarized'
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    Plug 'gerw/vim-HiLinkTrace', { 'on': 'HLT' }
+    Plug 'vim-scripts/icalendar.vim'
+    Plug 'tpope/vim-repeat'
+    Plug 'junegunn/vader.vim'
+    Plug 'wchargin/merlin', {
+                \ 'as': 'merlin-vimbufsync',
+                \ 'for': 'ocaml',
+                \ 'rtp': 'vim/vimbufsync/',
+                \ 'branch': 'v2.3.1a'
+                \}
+    Plug 'wchargin/merlin', {
+                \ 'as': 'merlin-primary',
+                \ 'for': 'ocaml',
+                \ 'rtp': 'vim/merlin/',
+                \ 'branch': 'v2.3.1a'
+                \}
+    call plug#end()
+else
+    echoerr "Missing vim-plug install! Head on over to " .
+        \ 'https://github.com/junegunn/vim-plug' . " "
+        \ "to install it, then relaunch vim and run :Initialize."
+endif
+syntax enable
+" }}}
+
+" Leader setup {{{
+" This is the most important mapping in the whole file!
+" The spacebar is big,
+" and you can't bind it to anything more extensible than <Leader>.
+let mapleader = ' '
+" }}}
+"
+" Configuration for some vim-plug plugins {{{
+" terryma/vim-multiple-cursors {{{
+let g:multi_cursor_exit_from_insert_mode = 0
+
+" create cursors matching a regex within a range (such as from visual mode)
+" example: Vjjjj:<C-N>foo.*bar<CR>
+cnoremap <C-N> MultipleCursorsFind<Space>
+
+" but they sometimes leave on virtualedit by mistake :(
+nnoremap <Leader><C-V> :set virtualedit=<CR>
+" }}}
+" junegunn/fzf {{{
+nnoremap <C-P> :FZF<CR>
+" }}}
+" altercation/vim-colors-solarized {{{
+set background=light
+set t_Co=256
+if $GIO_LAUNCHED_DESKTOP_FILE !~ 'jetbrains'
+    silent! colorscheme solarized
+endif
+" }}}
+" junegunn/vim-easy-align {{{
+" save original mapping for |ga| as |gA|
+nnoremap gA ga
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
+let g:easy_align_delimiters = {
+\ '>': { 'pattern': '->\|=>\|>>\|>' },
+\ }
+" }}}
+" wchargin/vim-latexsuite {{{
+" Set up LaTeX-Suite / vimLaTeX.
+let g:Tex_DefaultTargetFormat='pdf'
+" Enable shell-escape. (Be careful!)
+let g:Tex_CompileRule_pdf = 'pdflatex -shell-escape -interaction=nonstopmode -file-line-error-style $*'
+let g:tex_flavor='latex'
+" Don't force a redraw when using evince.
+let g:Tex_ViewRule_pdf='evince 2>/dev/null'
+let g:tex_use_sized_delimiters = 1
+" }}}
+" scrooloose/syntastic {{{
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list            = 0
+let g:syntastic_check_on_open            = 1
+let g:syntastic_check_on_wq              = 0
+let g:syntastic_tex_checkers             = []  " no signal, all noise
+let g:syntastic_mode_map = {
+    \ "mode": "active",
+    \ "active_filetypes": [],
+    \ "passive_filetypes":
+    \ ["racket", "asm", "java", "html", "python", "lex", "yacc"] }
+let g:syntastic_cpp_compiler_options = ' -std=c++11 -O2 -lm'
+nnoremap <Leader>S :SyntasticReset<CR>:SyntasticCheck<CR>
+" }}}
+" scrooloose/nerdtree {{{
+nnoremap <Leader>T :NERDTreeToggle<CR>
+let g:NERDTreeHijackNetrw = 0
+" }}}
+" jiangmiao/auto-pairs {{{
+" Single quotes are more trouble than they're worth,
+" because they're often used unpaired
+" (e.g., symbols in Racket, lifetimes in Rust).
+autocmd! User auto-pairs call remove(g:AutoPairs, "'")
+" }}}
+" mbbill/undotree {{{
+" I never use |U| (undo-line) anyway.
+nnoremap U :UndotreeToggle<CR>:UndotreeFocus<CR>
+if has("persistent_undo")
+    set undodir=~/.undodir/
+    set undofile
+endif
+" }}}
+" vim-airline/vim-airline {{{
+let g:airline_powerline_fonts = 1
+" let g:airline_section_gutter = "%{HaskellCursorType()}%="
+function! HaskellCursorType()
+    if &l:ft != "haskell"
+        return ""
+    else
+        let l:file = expand("%")
+        if l:file == ''
+            return ""
+        endif
+        if !filereadable(l:file)
+            return ""
+        endif
+        let l:line = line('.')
+        let l:col = col('.')
+        let l:cmd = hdevtools#build_command('type', shellescape(l:file) . ' ' . l:line . ' ' . l:col)
+        silent let l:output = system(l:cmd)
+        let l:lines = split(l:output, '\n')
+        if len(l:lines) == 0
+            return "(no type)"
+        endif
+        return matchstr(l:lines[0], '"\zs[^"]\+\ze"')
+    endif
+endfunction
+" }}}
+" klen/python-mode {{{
+let g:pymode_lint = 1
+let g:pymode_lint_on_write = 0
+let g:pymode_trim_whitespaces = 0
+
+" Be less strict about holding down modifiers for too long.
+nmap <C-C><C-G> <C-C>g
+
+" Close the preview window with <C-Space>. As a corollary, close it from
+" insert mode with <C-O><C-Space>, which flows very nicely.
+nnoremap <C-Space> :pclose<CR>
+nnoremap <NUL> :pclose<CR>
+" }}}
+" mxw/vim-jsx {{{
+let g:jsx_ext_required = 0
+" }}}
+" wchargin/vim-better-sml {{{
+let g:sml_greek_tyvar_show_tick = 1
+" }}}
+" }}}
+
+" General settings {{{
+
+filetype indent on
+filetype plugin on
+
+set autoindent
+set expandtab
+"
+" Default indentation (often overriden by filetype)
+set shiftwidth=4
+set tabstop=4
+set softtabstop=4
+
+set foldlevel=99
+
+" Highlight current line and display an 80-column guard
+" (or, whatever textwidth is at)
+set cursorline
+set colorcolumn=+1
+
+set nohlsearch  " on by default in neovim; I don't usually want it
+
+if !has("nvim")
+    " In non-neovim, this shortens the dead time delay
+    " after hitting escape to clear vim-multiple-cursors.
+    " But neovim has no delay anyway (yay!!!) so we don't need it.
+    set timeoutlen=250
+end
+
+" The Debian vimrc has this by default, but OS X doesn't. (???)
+set backspace=eol,indent,start
+
+" Warp-speed macro execution (just mash <C-L> if something breaks)
+set lazyredraw
+
+set number
+" set relativenumber
+
+set wildmenu
+set wildignore+=*/.git/,*.pdf,*.aux,*.out,*.log
+set nojoinspaces
+set showtabline=2
+
+set incsearch
+set ignorecase
+set smartcase
+
+set secure exrc  " per-directory .vimrc files
+
+" this is wonderful for TeX
+set conceallevel=1
+
+" Allow using a Greek keyboard (stolen from :help langmap)
+set langmap=ΑA,ΒB,ΨC,ΔD,ΕE,ΦF,ΓG,ΗH,ΙI,ΞJ,ΚK,ΛL,ΜM,ΝN,ΟO,ΠP,QQ,ΡR,ΣS,ΤT,ΘU,ΩV,WW,ΧX,ΥY,ΖZ,αa,βb,ψc,δd,εe,φf,γg,ηh,ιi,ξj,κk,λl,μm,νn,οo,πp,qq,ρr,σs,τt,θu,ωv,ςw,χx,υy,ζz
+
+digraph .. 8230  " 0x2026 HORIZONTAL ELLIPSIS
+digraph :> 8614  " 0x21A6 RIGHTWARDS ARROW FROM BAR (i.e., \mapsto)
+digraph ?! 8253  " 0x203D INTERROBANG
+digraph .B 8226  " 0x2022 BULLET
+
+" Digraphs for unicode superscripts and subscripts
+let s:digit = 0
+function! MakeDigraph(digraph, codepoint)
+    exec 'digraph ' . a:digraph . ' ' a:codepoint
+endfunction
+while s:digit <= 9
+    call MakeDigraph("^" . s:digit, 8304 + s:digit)  " 0x207n SUPERSCRIPT <n>
+    call MakeDigraph("_" . s:digit, 8320 + s:digit)  " 0x208n SUBSCRIPT <n>
+    let s:digit += 1
+endwhile
+call MakeDigraph("^1", 185)  " 0x00B9 SUPERSCRIPT ONE   (special case)
+call MakeDigraph("^2", 178)  " 0x00B2 SUPERSCRIPT TWO   (special case)
+call MakeDigraph("^3", 179)  " 0x00B3 SUPERSCRIPT THREE (special case)
+
+" Spelling {{{
+
+setlocal spell spelllang=en_us
+highlight clear SpellCap
+
+" Shortcut for "pick first spelling suggestion."
+noremap z; 1z=
+
+" Edit the spellfile.
+" TODO: Find some way to locate this file automatically...
+nnoremap <Leader>z<Space> :tabe ~/.config/nvim/spell/en.utf-8.add<CR>
+
+" Go back to last misspelled word and pick first suggestion.
+inoremap <C-L> <C-G>u<Esc>[smz1z=`]a<C-G>u
+
+" Downcase the most recent word.
+inoremap <C-U> <C-G>u<Esc>vbgu`]a<C-G>u
+
+" Select last misspelled word (typing will edit).
+nnoremap <C-K> <Esc>[sve<C-G>
+snoremap <C-K> <Esc>b[sviw<C-G>
+
+" }}}
+
+" }}}
+" General-purpose functions and mappings {{{
+
+" Make it easy to become more efficient.
+command! V tabedit $MYVIMRC
+
+" Saving often is great, and it's easier if it's faster.
+nnoremap <Leader>w :w<CR>
+nnoremap <Leader>W :w<CR>
+
+command! Here ! xdg-open %:p:h &
+nnoremap <leader>; :Here<CR>
+
+" mnemonic: delete space
+nnoremap <Leader>d<Space> :%s/\s\+$//c<CR>
+
+" for working in quick scratch files while using the proper highlighting
+nnoremap <Leader><C-F> :set ft=
+
+" I like to use <C-Space> for autocompletion, like in most IDEs.
+" <C-Space> works in GUIs, <NUL> works in terminals
+inoremap <C-Space> <C-N>
+inoremap <NUL> <C-N>
+
+" Easily spawn external commands
+nnoremap <Leader>x :!<Space>
+vnoremap <Leader>x "zy:! <C-R>=substitute(@z, nr2char(10), '; ', 'g')<CR>
+nnoremap <Leader>X :!<Up>
+
+" Mostly just for fun...
+nnoremap <F3> ggg?G``
+
+" Format text at 72 characters, as recommended by PEP-8. Used for
+" comments and the like.
+function! FormatText()
+    let l:old_tw = &tw
+    let &tw = 72
+    norm gvgq
+    let &tw = l:old_tw
+endfunction
+vnoremap <Leader>f <Esc>:call FormatText()<CR>
+
+" Remove consecutive blank lines.
+" (Useful for cleaning up the results of pre-processing macro expansions,
+" e.g., after 'ghc -E Literate.lhs'.)
+command! Collapse %s/\n\n\n\+//g
+" }}}
+" Statusline setup {{{
+
+if exists(":AirlineRefresh")
+    AirlineRefresh
+else
+    " (This does nothing when vim-airline is present.)
+    " Some of this borrowed from: http://stackoverflow.com/a/5547968/732016
+    set statusline=
+    set statusline+=%f\                          " filename
+    set statusline+=(%n)                         " buffer number
+    set statusline+=%h%m%r%w                     " status flags
+    set statusline+=\[%{strlen(&ft)?&ft:'none'}] " file type
+    "
+    set statusline+=%#warningmsg#
+    if exists("*SyntasticStatuslineFlag")
+        set statusline+=%{SyntasticStatuslineFlag()}
+    endif
+    set statusline+=%*
+    "
+    set statusline+=%=                           " right align remainder
+    set statusline+=%-14(%l,%c%V%)               " line, character
+    set statusline+=%<%P                         " file position
+    set laststatus=2
+endif
+
+" }}}
+" Filetype-sensitive REPL access {{{
+let g:repl_commands_by_filetype = {
+            \ "haskell": ["ghci", "%"],
+            \ "lhaskell": ["ghci", "%"],
+            \ "sml": ["/home/wchargin/bin/smlc", "%"],
+            \ "python": ["ipython"],
+            \ "racket": ["racket", "%"],
+            \ "rust": ["cargo", "run"],
+            \ }
+function! EnterRepl()
+    if has_key(g:repl_commands_by_filetype, &ft)
+        let l:cmd_parts = map(copy(g:repl_commands_by_filetype[&ft]),
+                    \ 'shellescape(expand(v:val))')
+        let l:cmd = join(l:cmd_parts)
+        execute "! " . l:cmd
+    else
+        echoerr "File type not present in dictionary: '" . &ft . "'"
+    endif
+endfunction
+command! R :call EnterRepl()
+command! REPL :call EnterRepl()
+" }}}
+
+" System clipboard interaction {{{
+"
+" We use <Leader>c for *C*lipboard interaction.
+nnoremap <Leader>cy "+y
+nnoremap <Leader>cY "+Y
+nnoremap <Leader>cp "+p
+nnoremap <Leader>cP "+P
+vnoremap <Leader>cy "+y
+"
+" It's also very often useful to copy the whole buffer.
+nnoremap <Leader>c<Space> ggVG"+y``
+"
+" }}}
+" Tab and window manipulation {{{
+nnoremap <Leader>v :vsplit<Space>
+nnoremap <Leader>s :split<Space>
+nnoremap <Leader><C-T> :tabe<Space>
+
+" <C-W>x is annoying, especially on a matric layout keyboard.
+nnoremap <C-W><C-E><C-R> <C-W>x
+
+" Switching tabs is annoying on a matrix layout keyboard,
+" and moving tabs is annoying in all cases.
+nnoremap gh gT
+nnoremap gl gt
+nnoremap gH :tabmove -1<CR>
+nnoremap gL :tabmove +1<CR>
+" }}}
+" Command line file completion {{{
+"
+" Current file and enclosing directory
+cnoremap <C-F> <C-R>=expand("%")<CR>
+cnoremap <C-H> %:h/
+"
+" Word under the cursor
+" <C-Space> works in GUIs, <NUL> works in terminals
+cnoremap <C-Space> <C-R>=expand("<cword> ")<CR>
+cnoremap <NUL>     <C-R>=expand("<cword> ")<CR>
+"
+" Source-to-test {{{
+" open foo_test.py from foo.py, or FooTest.hs from Foo.hs,
+" using :tabe <C-T><CR>
+" Defaults to '...Test' if filename has a capital letter,
+" or '...-test' if filename has a hyphen,
+" else '..._test'.
+" This can be changed by filetype with g:test_file_suffixes_by_filetype,
+" a dictionary of shape 'filetype: [lowercase_suffix, uppercase_suffix]'.
+let g:test_file_suffixes_by_filetype = {
+            \ 'haskell': ['spec', 'Spec'],
+            \ 'lhaskell': ['spec', 'Spec'],
+            \ }
+let g:default_test_file_suffixes = ['test', 'Test']
+function! GetTestFileSuffixesForCurrentFiletype()
+    return has_key(g:test_file_suffixes_by_filetype, &ft) ?
+                \ g:test_file_suffixes_by_filetype[&ft] :
+                \ g:default_test_file_suffixes
+endfunction
+function! GetTestFile()
+    let l:bindings = GetTestFileSuffixesForCurrentFiletype()
+    let l:lowercase = l:bindings[0]
+    let l:uppercase = l:bindings[1]
+    if expand("%:e") == ""
+        return expand("%") . "_" . l:lowercase
+    elseif expand("%:t") =~ '\u'
+        let l:suffix = l:uppercase
+    elseif expand("%:t") =~ '-'
+        let l:suffix = "-" . l:lowercase
+    else
+        let l:suffix = "_" . l:lowercase
+    end
+    "
+    " Try to change a 'src' directory to a 'test' directory
+    let l:tail_processed = expand("%<") . l:suffix . "." . expand("%:e")
+    return SubstituteDirectory(l:tail_processed, "src", "test")
+endfunction
+cnoremap <C-T> <C-R>=GetTestFile()<Enter><Space>
+" }}}
+" Test-to-source {{{
+" open foo.py from foo_test.py, or Foo.hs from FooTest.hs,
+" using :tabe <C-Y><CR> (<C-Y> is right next to <C-T>)
+function! GetCotestFile()
+    let l:bindings = GetTestFileSuffixesForCurrentFiletype()
+    let l:lowercase = l:bindings[0]
+    let l:uppercase = l:bindings[1]
+    let l:trim_test_regex = '\(' .
+                \ '_' . l:lowercase . '\|' .
+                \ '-' . l:lowercase . '\|' .
+                \ l:uppercase .
+                \ '\)\>'
+    let l:subbed_tail = substitute(expand("%:t"), l:trim_test_regex, '', '')
+    let l:tail_processed = expand("%:h") . '/' . l:subbed_tail
+    return SubstituteDirectory(l:tail_processed, "test", "src")
+endfunction
+cnoremap <C-Y> <C-R>=GetCotestFile()<Enter><Space>
+" }}}
+function! SubstituteDirectory(input, from, to)
+    " \{-\} is non-greedy wildcard, aka *?
+    let l:regex = '^\(.\{-\}/\?\)' . a:from . '\(/.*\)$'
+    let l:replacement = '\1' . a:to . '\2'
+    return substitute(a:input, l:regex, l:replacement, "")
+endfunction
+"
+" }}}
+" Additional "toggle" bindings (à la unimpaired) {{{
+function! ToggleMouse()
+    if &mouse == 'a'
+        set mouse=
+    else
+        " enable mouse everywhere
+        set mouse=a
+    endif
+endfunction
+nnoremap <silent> com :call ToggleMouse()<CR>
+set mouse=
+
+" mnemonic: toggle 'konceal'
+function! ToggleConceal()
+    if &conceallevel == 0
+        setlocal conceallevel=1
+        redraw!
+        echo ':setlocal conceallevel=1'
+    else
+        setlocal conceallevel=0
+        redraw!
+        echo ':setlocal conceallevel=0'
+    endif
+endfunction
+nnoremap <silent> cok :call ToggleConceal()<CR>
+
+" mnemonic: toggle 'Koncealcursor' ('Koncealkursor'?)
+function! ToggleConcealcursor()
+    if &concealcursor == ''
+        setlocal concealcursor+=nvic
+        echo ':setlocal concealcursor+=nvic'
+    else
+        setlocal concealcursor-=nvic
+        echo ':setlocal concealcursor-=nvic'
+    endif
+    redraw!
+endfunction
+nnoremap <silent> coK :call ToggleConcealcursor()<CR>
+
+" Toggle completion mode preview window
+function! ToggleCompleteOptPreview()
+    let l:opts = split(&completeopt, ',')
+    if index(l:opts, 'preview') >= 0
+        call filter(l:opts, 'v:val != "preview"')
+        pclose
+    else
+        let l:opts = l:opts + ['preview']
+    endif
+    let l:new_value = join(l:opts, ',')
+    echo ':setlocal completeopt=' . l:new_value
+    let &completeopt = l:new_value
+endfunction
+nnoremap <silent> cop :call ToggleCompleteOptPreview()<CR>
+
+" }}}
+" Terminal emulation (requires ConqueTerm or Neovim) {{{
+if has("nvim")
+    let g:ConqueTerm_CloseOnEnd = 0
+    nnoremap <Leader>t<Space> :terminal<CR>
+    nnoremap <Leader>ts :split <Bar> terminal<CR>
+    nnoremap <Leader>tv :vsplit <Bar> terminal<CR>
+    nnoremap <Leader>tw :tabnew <Bar> terminal<CR>
+    nnoremap <Leader>tk :bdelete
+    function! SplitShell(cmd)
+        exec ":split | terminal " . a:cmd
+    endfunction
+else
+    let g:ConqueTerm_CloseOnEnd = 0
+    nnoremap <Leader>t<Space> :ConqueTerm bash<CR>
+    nnoremap <Leader>ts :ConqueTermSplit bash<CR>
+    nnoremap <Leader>tv :ConqueTermVSplit bash<CR>
+    nnoremap <Leader>tw :ConqueTermTab bash<CR>
+    nnoremap <Leader>tk :bdelete
+    function! SplitShell(cmd)
+        exec ":ConqueTermSplit " . a:cmd
+    endfunction
+endif
+
+" Provide an :Sh alongside vim's :sh.
+command! -nargs=* -complete=shellcmd Shell call SplitShell("<args>")
+" }}}
+" Toggle arrow keys (when loaning to beginners, to promote good habits) {{{
+function! SetArrowsEnabled(enabled)
+    let l:dirs = ['<Left>', '<Right>', '<Up>', '<Down>']
+    if a:enabled
+        for dir in dirs
+            silent! exec 'iunmap ' . dir
+            silent! exec 'unmap ' . dir
+        endfor
+    else
+        for dir in dirs
+            exec 'inoremap ' . dir . ' <NOP>'
+            exec 'noremap ' . dir . ' <NOP>'
+        endfor
+    endif
+endfunction
+command! EnableArrows  :call SetArrowsEnabled(1)
+command! DisableArrows :call SetArrowsEnabled(0)
+" }}}
+
+" Git {{{
+function! _ShellMap(mode, binding, command)
+    " mode like 'nnoremap'
+    " binding like '<Leader>gx'
+    " command like 'git status<CR>'
+    let l:activation = has('nvim') ? ':split <Bar> terminal ' : ':!'
+    exec a:mode . ' ' . a:binding . ' ' . l:activation . a:command
+endfunction
+call _ShellMap('nnoremap', '<Leader>gd', 'git diff<CR>')
+call _ShellMap('nnoremap', '<Leader>gD', 'git diff --staged<CR>')
+call _ShellMap('nnoremap', '<Leader>gp', 'git add --patch<CR>')
+call _ShellMap('nnoremap', '<Leader>go', 'git show<CR>')
+if has_key(plugs, 'vim-fugitive')
+    nnoremap <Leader>gs :Gstatus<CR>
+    nnoremap <Leader>gc :Gcommit<CR>
+    nnoremap <Leader>ga :Gcommit --amend<CR>
+else
+    call _ShellMap('nnoremap', '<Leader>gs', 'git status<CR>')
+    call _ShellMap('nnoremap', '<Leader>gc', 'git commit<CR>')
+    call _ShellMap('nnoremap', '<Leader>ga', 'git commit --amend<CR>')
+endif
+call _ShellMap('nnoremap', '<Leader>gl', 'git lg<CR>')
+nnoremap <Leader>g<Space> :Ggrep<Space>
+vnoremap <Leader>g<Space> "zy:Ggrep <C-R>z
+vnoremap <Leader>g<CR> "zy:Ggrep <C-R>z<CR>
+nnoremap <Leader>g/ :Ggrep <C-R>/
+nnoremap <Leader>gb :Gblame<CR>
+nnoremap <Leader>gra oexec arc amend<ESC>
+nnoremap <Leader>grd oexec arc diff HEAD^<ESC>
+nnoremap <Leader>grD oexec arc diff HEAD^ --verbatim<ESC>
+nnoremap <Leader>grm m`Oexec git fetch origin && git merge origin/master && git submodule update --init --recursive<ESC>``
+nnoremap <Leader>grp oexec git push origin HEAD:refs/heads/<C-R>=system("git rev-parse --abbrev-ref HEAD")<CR><Esc>dd
+" }}}
+" Phabricator and Arcanist {{{
+call _ShellMap('nnoremap', '<Leader>ad', 'arc diff --preview<Space>')
+call _ShellMap('nnoremap', '<Leader>al', 'arc lint<CR>')
+call _ShellMap('nnoremap', '<Leader>aL', 'arc lint %<CR>')
+au BufRead,BufNewFile */new-commit set filetype=gitcommit
+" }}}
+
+" OpenBetterFile: fix sloppy command-line autocompletion {{{
+" If I tab-complete 'some_mod<Tab>', I want to get 'some_mod.py'.
+" But maybe there's also a 'some_mod_test.py', so I just get 'some_mod'.
+" Or, maybe there's a 'some_mod.pyc' file, so I just get 'some_mod.'.
+" We detect both these cases and open the correct file.
+autocmd BufNewFile * :call OpenBetterFile()
+function! OpenBetterFile()
+    if expand("%:e") != ""
+        return
+        " Has file extension already
+    endif
+
+    for extension in [".tex", ".lhs", ".hs", ".py", ".java", ".js", ".sh", ".ml"]
+        let l:extended_name = expand("%:r") . extension
+        if filereadable(extended_name)
+            execute ':edit ' . fnameescape(extended_name)
+
+            " Trigger syntax highlighting, etc.
+            doautocmd BufRead
+        endif
+    endfor
+endfunction
+" }}}
+" MvAndEdit: Rename a file and switch to edit the new one {{{
+function! MvAndEdit(new_name, force, git)
+    if !empty(glob(a:new_name)) && !a:force
+        echoerr "Target exists (add ! to overwrite)"
+        return -1
+    endif
+    let l:mvcmd = "mv"
+    if a:git
+        let l:mvcmd = "git mv"
+    endif
+    let l:cmd =
+        \ l:mvcmd .
+        \ " " .
+        \ shellescape(expand("%")) .
+        \ " " .
+        \ shellescape(a:new_name)
+    call system(l:cmd)
+    if v:shell_error != 0
+        echoerr l:mvcmd . " exited with error " . v:shell_error . "; aborting"
+        return -1
+    endif
+    exec "edit " . fnameescape(a:new_name)
+endfunction
+command! -bang -nargs=1 -complete=file Mv call MvAndEdit("<args>", <bang>0, 0)
+command! -bang -nargs=1 -complete=file Gmv call MvAndEdit("<args>", <bang>0, 1)
+" }}}
+
+" ftplugins {{{
+"
+" ~/.vim/after/ftplugin is a great idea,
+" but if I put everything here I can keep all my changes centralized!
+"
+" Git {{{
+" Show summaries past 50 characters as errors.
+" (This is present in /usr/share/vim/vim74/syntax/gitcommit.vim,
+" but is commented out.)
+autocmd FileType gitcommit hi def link gitcommitOverflow Error
+if has("nvim")
+    autocmd FileType gitrebase setlocal keywordprg=:Sh\ git\ show
+endif
+" }}}
+" Haskell {{{
+autocmd FileType haskell call FtpluginHaskell()
+autocmd BufRead *.hspp setlocal filetype=haskell
+function! FtpluginHaskell()
+    setlocal nospell
+    setlocal concealcursor+=nvic
+    nnoremap <buffer> <Leader>ht :HdevtoolsType<CR>
+    nnoremap <buffer> <silent> <Leader>hc :HdevtoolsClear<CR>
+    nnoremap <buffer> <silent> <Leader>hi :HdevtoolsInfo<CR>
+    "
+    " Match a dot, but only when surrounded by whitespace or parentheses.
+    " This is not _strictly_ necessary,
+    " but it is certainly sufficient:
+    " it doesn't conceal qualified paths (Map.lookup)
+    " or ranges ([1..3])
+    " or explicit quantifiers (forall a. a -> a).
+    syntax match hsCompositionDot /\m\%(\s\|(\)\zs\.\ze\%(\s\|)\)/ conceal cchar=∘
+    syntax match hsLambda /\\/ conceal cchar=λ
+endfunction
+" }}}
+" Scheme and Racket {{{
+autocmd FileType scheme call FtpluginScheme()
+function! FtpluginScheme()
+    " see :help cterm-colors
+    let l:colors_light = map([
+        \ 'DarkRed',
+        \ 'LightBlue',
+        \ 'Black',
+        \ 'DarkGreen',
+        \ 'DarkBlue',
+        \ 'DarkMagenta',
+    \ ], '[v:val, v:val]')
+    let l:colors_dark = map([
+        \ 'White',
+        \ 'DarkRed',
+        \ 'DarkBlue',
+        \ 'LightBlue',
+        \ 'LightYellow',
+        \ 'DarkGreen',
+        \ 'LightCyan',
+    \ ], '[v:val, v:val]')
+    let g:rainbow#max_level = max([len(l:colors_dark), len(l:colors_light)])
+    let g:rainbow#colors = { 'dark': l:colors_dark, 'light': l:colors_light }
+    let g:rainbow#pairs = [['(', ')'], ['[', ']'], ['{', '}']]
+    RainbowParentheses
+    setlocal cursorcolumn
+    inoremap <C-\> λ
+    cnoremap <C-\> λ
+    " Note: this affects all open buffers. I'm okay with that.
+    if has_key(g:AutoPairs, '`')
+        call remove(g:AutoPairs, "`")
+    endif
+endfunction
+" }}}
+" OCaml {{{
+autocmd FileType ocaml call FtpluginOcaml()
+autocmd BufRead,BufNewFile *.mll set ft=lex
+autocmd BufRead,BufNewFile *.mly set ft=yacc
+function! FtpluginOcaml()
+    let g:syntastic_ocaml_checkers = ['merlin']
+    setlocal concealcursor+=nvic
+    nnoremap <buffer> <Leader>od :MerlinDestruct<CR>
+    nnoremap <buffer> <Leader>ot :MerlinTypeOf<CR>
+    nnoremap <buffer> <Leader>ok :MerlinGrowEnclosing<CR>
+    nnoremap <buffer> <Leader>oj :MerlinShrinkEnclosing<CR>
+    nnoremap <buffer> <Leader>oc :MerlinClearEnclosing<CR>
+    vnoremap <buffer> <Leader>ot :MerlinTypeOfSel<CR>
+    nnoremap <buffer> <silent> <Leader>ho :MerlinClearEnclosing<CR>
+    nnoremap <buffer> <C-C>g :MerlinLocate<CR>
+
+    " OCaml tries to omap, vmap, and nmap "%" to some language-specific
+    " thing...but it really doesn't work very well. Kill it!
+    silent! unmap %
+endfunction
+" }}}
+" TeX and LaTeX {{{
+autocmd FileType tex call FtpluginTex()
+function! FtpluginTex()
+    setlocal shiftwidth=2 tabstop=2 softtabstop=2
+    "
+    " When you type EDO, \documentclass[<++>]{<++>} is inserted.
+    " Often, you don't want the optional arguments.
+    " So use <C-J> to jump to them, then <C-T> to delete them.
+    " Similar is included for <C-R> (though much less commonly used).
+    snoremap <C-T> <Esc>da[
+    snoremap <C-R> <Esc>da{
+    "
+    " Don't need line numbering for documents, unless we have relativenumber
+    " (in which case we already have the bar and the '0' is useless).
+    if ! &relativenumber
+        setlocal nonumber
+    endif
+    "
+    let l:warnings_to_add = [
+                \ 'T1/zi4',
+                \ 'Font shape',
+                \ 'Some font shapes',
+                \ 'Size substitutions with differences',
+                \ ]
+    let l:warnings = exists("g:Tex_IgnoredWarnings") ?
+        \ split(g:Tex_IgnoredWarnings, "\n") : []
+    let l:ignore_level = exists("g:Tex_IgnoreLevel") ?
+        \ g:Tex_IgnoreLevel : 0
+    for warning in l:warnings_to_add
+        if index(l:warnings, warning) == -1
+            call insert(l:warnings, warning)
+            let l:ignore_level += 1
+        endif
+    endfor
+    let g:Tex_IgnoredWarnings = join(l:warnings, "\n")
+    let g:Tex_IgnoreLevel = l:ignore_level
+    " Now we need to regenerate 'errorformat':
+    execute "TCLevel " . l:ignore_level
+    "
+    nnoremap <silent> <leader>lb :!biber %<<CR>
+    nnoremap <silent> <leader>lg :!makeglossaries %<<CR>
+    nnoremap <buffer> <leader>lc :!texcount %<CR>
+    "
+    " Mapping to opening texdoc (LaTeX package documentation)
+    " Command defined in main vimrc file.
+    command! -nargs=1 Texdoc !texdoc <q-args>
+    noremap <buffer> <leader>lK :Texdoc <cword><CR>
+    setlocal keywordprg=texdoc
+    "
+    " The default includes environments that I don't use, like $$ and \[\].
+    " I've gotten used to align* = 8, so leave that last.
+    let g:Tex_PromptedEnvironments =
+        \ 'tikzpicture,axis,center,lstlisting,equation*,gather*,align,align*'
+    "
+    " Recognize \noun{} as a command;
+    " include mappings for insert and visual mode.
+    call IMAP("FNO", "\\noun{<++>}<++>", "tex")
+    exec "vnoremap <silent> " . g:Tex_Leader . "no "
+        \ "\<C-\\>\<C-N>:call VEnclose('\\noun{', '}', '\\noun{%', '}')<CR>"
+    "
+    " for 'exam' class
+    let g:tex_items .= '\|\\question\|\\titledquestion\|\\part\>\|\\choice'
+    let g:tex_itemize_env .= '\|questions\|parts\|choices\|subproblems'
+    setlocal indentkeys+==\question
+    "
+    " For 'cleveref'
+      syn region texRefZone matchgroup=texStatement start="\\v\=[Cc]ref{" end="}\|%stopzone\>" contains=@texRefGroup
+    "
+    " Backticks aren't paired delimiters in TeX as they are in most languages
+    " (e.g., ES6's string interpolation, Bash's command substitution).
+    " We don't want to AutoPair them; LaTeX-Suite handles them correctly.
+    if exists("g:AutoPairs") && has_key(g:AutoPairs, '`')
+        call remove(g:AutoPairs, "`")
+    endif
+    "
+    " Text objects for selecting and operating around and within
+    " single-dollar-sign math delimiters on a single line.
+    vnoremap a$ :<C-U>silent! normal! F$vf$<CR>
+    vnoremap i$ :<C-U>silent! normal! T$vt$<CR>
+    omap a$ :normal va$<CR>
+    omap i$ :normal vi$<CR>
+    "
+    " Don't warn me about long lines.
+    setlocal textwidth=0
+    "
+    " For vim-surround: use ysiwq to add quotes to a word, etc.
+    let b:surround_113 = "``\r''"
+    "
+    let g:Tex_UseMakefile = 0
+    " Concealment {{{
+    "
+    " Function ConcealMath: Add a TeX math pretty-printing alias
+    " Usage: call ConcealMath('cmdName', 'replacement', optSuffix, optPrefix)
+    "
+    " The optional suffix defaults to '\>',
+    " which will force the end of the match to occur on a word boundary
+    " (so '\iso' will not match '\isosceles').
+    " (See ':help \>' for more information.)
+    " If this is a control symbol (like \:) instead of a control word (like \x),
+    " then this is not desirable; in this case, set the suffix to ''.
+    "
+    " The prefix defaults to the '\' required for a TeX macro;
+    " I don't know why you'd want to change this.
+    "
+    " Example: call ConcealMath('cdot', '·')
+    " Example: call ConcealMath(':',    '_', '')       " don't end at word boundary
+    "
+    function! ConcealMath(old, new, ...)
+        let l:suffix = (a:0 >= 1) ? a:1 : '\>'
+        let l:prefix = (a:0 >= 2) ? a:2 : '\\'
+        let l:match = "'" . l:prefix . a:old . l:suffix . "'"
+        exe "syntax match texMathSymbol " . l:match . " contained conceal cchar=" . a:new
+    endfunction
+    "
+    " Standard TeX/LaTeX commands
+    call ConcealMath('land',        '∧')
+    call ConcealMath('lor',         '∨')
+    call ConcealMath('lnot',        '¬')
+    call ConcealMath('infty',       '∞')
+    call ConcealMath(',',           ' ', '')    " thin space (control symbol: \,)
+    "
+    " Standard packages
+    call ConcealMath('implies',     '⇒')    " amssymb
+    call ConcealMath('impliedby',   '⇐')    " amssymb
+    call ConcealMath('iff',         '⇔')    " amssymb
+    call ConcealMath('rar',         '→')    " tikz-cd
+    call ConcealMath('lar',         '←')    " tikz-cd
+    "
+    " My custom commands
+    call ConcealMath('then',        ':')    " \forall x \then x^2 \geq 0
+    call ConcealMath('tuple',       '◊')    " \tuple{a, b} -> \langle a, b \rangle
+    call ConcealMath('iso',         '≅')    " alias for \cong  (from amssymb)
+    call ConcealMath('niso',        '≇')    " alias for \ncong (from amssymb)
+    call ConcealMath('maps',        'ℒ')    " linear maps (for Hom-sets in Vec_k)
+    call ConcealMath('powerset',    'P')
+    call ConcealMath('abs',         '|')
+    call ConcealMath('norm',        '‖')
+    " TODO: Once vim properly conceals both ends of a region (existing bug
+    " report as of 8.0), replace the above two commands with the
+    " following three:
+    " syn region texMathAbs matchgroup=texStatement start='\\abs\s*{' end='}' contains=@texMathMatchGroup concealends cchar=|
+    " syn region texMathNorm matchgroup=texStatement start='\\norm\s*{' end='}' contains=@texMathMatchGroup concealends cchar=‖
+    " syn cluster texMathZoneGroup add=texMathAbs,texMathNorm
+    call ConcealMath('bigO',        '𝓞')
+    call ConcealMath('bigTheta',    'Θ')
+    call ConcealMath('bigOmega',    'Ω')
+    call ConcealMath('exeq',        '≅')    " extensional equivalence
+    call ConcealMath('redto',       '⇒')    " reduces to
+    "
+    " Function ConcealMathbb: Add TeX pretty-printing aliases for blackboard bold.
+    " Usage: call ConcealMathbb('normalCharacter', 'doubleStruckCharacter')
+    "
+    " The best way to find the codepoints for the double-struck characters
+    " is to visit this webpage provided by the W3:
+    " http://www.w3.org/TR/MathML2/double-struck.html
+    "
+    " The above table highlights some of the rows in yellow because
+    " the double-struck characters are spread across two blocks of Unicode:
+    " a privileged few are in the Basic Multilingual Plane
+    " within the Letterlike Symbols block (U+2100 through U+214F);
+    " you can view those succinctly here:
+    " http://www.fileformat.info/info/unicode/block/letterlike_symbols/list.htm
+    " These are the yellow-highlighted rows in the table,
+    " and, when possible, it's always best to stay within the BMP.
+    "
+    " The ones that aren't in the BMP are listed consecutively
+    " from U+1D538 to U+1D56B, in Mathematical Alphanumerical Symbols.
+    " You can view those here:
+    " http://www.fileformat.info/info/unicode/block/mathematical_alphanumeric_symbols/list.htm
+    " This includes lowercase letters as well.
+    "
+    " Test Plan:
+    " If you enter the following into a TeX file, you should see "-ℕ ℕ ℕ ℕ-":
+    "     $\mathbb{N} \mathbb N \mB{N} \mB N$
+    function! ConcealMathbb(old, new, alsoStandalone)
+        "
+        " Standard blackboard-bold from 'amsfonts'.
+        " These can be written as '\mathbb{N}x' or '\mathbb Nx'
+        " (each of which is equivalent to '\mathbb N x'),
+        " so the last character doesn't have to be a word boundary
+        " and we provide an empty string for the suffix.
+        call ConcealMath('mathbb{' . a:old . '}', a:new, '')    " \mathbb{N}
+        call ConcealMath('mathbb ' . a:old,       a:new, '')    " \mathbb{N}
+        "
+        " My shortcut for \mathbb.
+        " Same suffix comment as above applies
+        " ('\mB{N}x' and '\mB Nx' are fine, and equivalent to '\mB N x').
+        call ConcealMath('mB{' . a:old . '}', a:new, '')       " \mB{N}
+        call ConcealMath('mB ' . a:old      , a:new, '')       " \mB N
+        "
+        " My even shorter shortcuts for some letters.
+        if a:alsoStandalone
+            call ConcealMath(a:old, a:new)                      " standalone \N
+        endif
+    endfunction
+    call ConcealMathbb('A', '𝔸', 0)     " algebraic numbers, usually
+    call ConcealMathbb('B', '𝔹', 0)     " set of Boolean values
+    call ConcealMathbb('R', 'ℝ', 1)
+    call ConcealMathbb('C', 'ℂ', 1)
+    call ConcealMathbb('Q', 'ℚ', 1)
+    call ConcealMathbb('Z', 'ℤ', 1)
+    call ConcealMathbb('N', 'ℕ', 1)
+    call ConcealMathbb('F', '𝔽', 1)     " arbitrary field
+    "
+    " Function FindCustomConcealments: Add concealments at runtime.
+    " Look for modeline-like lines of the form
+    "     % conceal: '<target>' '<replacement>'
+    " where <target> is any non-empty string
+    " and <replacement> is any single character.
+    function! FindCustomConcealments()
+        let l:pat =   '\m^\s*\%(\S\+\s\+\)\?' .
+                    \ '\<conceal:\s\+' .
+                    \ "'" . '\([^' . "'" . ']\+\)' . "'" . '\s\+' .
+                    \ "'" . '\([^' . "'" . ']\)'   . "'" . '\s*$'
+        let l:old_line = line('.')
+        let l:old_col = col('.')
+        call cursor(1, 1)
+        let l:at_start = 1
+        let l:base_flags = 'W'
+        while search(l:pat, l:base_flags . (l:at_start ? 'c' : ''))
+            let l:at_start = 0
+            let l:this_line = getline('.')
+            let l:groups = matchlist(l:this_line, l:pat)
+            call ConcealMath(l:groups[1], l:groups[2])
+        endwhile
+        call cursor(l:old_line, l:old_col)
+    endfunction
+    call FindCustomConcealments()
+    " }}}
+endfunction
+" }}}
+" Lilypond {{{
+autocmd FileType lilypond call FtpluginLilypond()
+function! FtpluginLilypond()
+    nnoremap <buffer> <Leader>ll :make<CR>
+    nnoremap <buffer> <Leader>lv :call OpenLilypondOutput("pdf")<CR>
+    nnoremap <buffer> <Leader>lm :call OpenLilypondOutput("midi")<CR>
+endfunction
+function! OpenLilypondOutput(suffix)
+    let l:file_to_open = FindLilypondOutput(a:suffix)
+    if l:file_to_open != -1
+        silent! exec "! xdg-open " . shellescape(l:file_to_open)
+    endif
+endfunction
+"
+" Function FindLilypondOutput: Guess the output for this file.
+" Usage: echo FindLilypondOutput('pdf')  " or 'midi' or something
+"
+" Assuming that the file currently being edited is a Lilypond file, try
+" to guess its output filename. On error, emit a message and return -1.
+"
+" If we have current directory "/foo/" and are editing "/bar/piano.ly", and
+" this function is called with the argument "pdf", then we'll look at
+" "/bar/piano.pdf", "/bar/*.pdf", "/bar/*-piano.pdf", "/foo/*.pdf", and
+" "/foo/*-piano.pdf", in that order. If any of those matches _exactly_
+" one file, then we return that file. Otherwise, we fail.
+"
+" Using the current directory is not really ideal, because it could have
+" totally spurious matches. But it's probably better than nothing?
+function! FindLilypondOutput(suffix)
+    let l:self_pdf = expand('%<') . '.' . a:suffix
+    if filereadable(l:self_pdf)
+        return l:self_pdf
+    endif
+    for l:basedir in [expand('%:h'), '.']
+        for l:nameglob in ['*', '*-' . fnameescape(expand('%:t:r'))]
+            let l:glob = l:basedir . '/' . l:nameglob . '.' . a:suffix
+            let l:candidates = glob(l:glob, 1, 1)
+            if len(l:candidates) == 1
+                return get(l:candidates, 0)
+            endif
+        endfor
+    endfor
+    echoerr "Unable to locate output for this Lilypond file."
+    return -1
+endfunction
+" }}}
+" JavaScript (especially with NPM and Webpack) {{{
+autocmd FileType javascript call FtpluginJavascript()
+function! FtpluginJavascript()
+    " need to touch things when webpack-dev-server doesn't pick up hot updates
+    nnoremap <buffer> <Leader>T :! touch %<CR><Space>
+    nnoremap <buffer> <Leader>W :w <Bar> ! touch %<CR><Space>
+endfunction
+" }}}
+" JSON {{{
+autocmd FileType json call FtpluginJson()
+function! FtpluginJson()
+    " Who thought it was a good idea to make quotes invisible??!
+    setlocal conceallevel=0
+endfunction
+" }}}
+" Java {{{
+autocmd FileType java call FtpluginJava()
+function! FtpluginJava()
+    " Ant support for Java files
+    set errorformat=%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
+    set makeprg=ant\ -find\ build.xml
+endfunction
+" C0 {{{
+au BufRead,BufNewFile *.h0 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l1 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l2 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l3 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l4 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l5 setlocal cindent syntax=c
+au BufRead,BufNewFile *.l6 setlocal cindent syntax=c
+au BufRead,BufNewFile *.abs setlocal syntax=asm
+" }}}
+" }}}
+" Octave {{{
+autocmd FileType matlab,octave call FtpluginOctave()
+function! FtpluginOctave()
+    " Run the current octave file
+    command Octave !octave -q %
+endfunction
+" }}}
+" SML {{{
+autocmd FileType sml call FtpluginSml()
+autocmd BufRead,BufNewFile *.sig set ft=sml
+function! FtpluginSml()
+    syntax match smlOperator /\w\@<!o\w\@!/ conceal cchar=∘
+endfunction
+" }}}
+" Handlebars {{{
+autocmd BufRead,BufNewFile *.handlebars set ft=htmldjango
+" }}}
+" Gradle {{{
+autocmd BufRead,BufNewFile *.gradle set ft=groovy
+" }}}
+" }}}
+
+" vim: foldmethod=marker foldlevel=0

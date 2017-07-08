@@ -1,0 +1,4 @@
+set editing-mode vi
+set bind-tty-special-chars off
+Control-u: kill-whole-line
+Control-w: backward-kill-word

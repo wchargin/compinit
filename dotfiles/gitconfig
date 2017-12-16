@@ -38,6 +38,8 @@
 	su = submodule update --init --recursive
     compare = "!f() { inargs=( \"$@\" ); if [ $# -eq 0 ]; then if git symbolic-ref HEAD 1>/dev/null 2>&1; then inargs+=( \"$(git rev-parse --abbrev-ref HEAD 2>&1)\" ); else inargs+=( HEAD ); fi; fi; outargs=( ); for inarg in \"${inargs[@]}\"; do outargs+=( \"${inarg}@{u}..${inarg}\" ); done; echo git ${OP:-lg} \"${outargs[@]}\"; git ${OP:-lg} \"${outargs[@]}\"; }; f"
 	please = push --force-with-lease
+	f = fetch origin
+	pm = pull origin master
 [push]
 	default = simple
 [core]
@@ -58,3 +60,5 @@
 	enabled = true
 [rebase]
 	autoSquash = true
+[mergetool "vimdiff"]
+	path = nvim

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Eternal bash history.
 # ---------------------
 # Undocumented feature which sets the size to "unlimited".
@@ -9,170 +11,52 @@ export HISTTIMEFORMAT="[%F %T] "
 # http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
 export HISTFILE=~/.bash_eternal_history
 
-# Force prompt to write history after every command.
-# http://superuser.com/questions/20900/bash-history-loss
-PROMPT_COMMAND+=" :; history -a; "
-
 export EDITOR=nvim
-alias vim=$EDITOR
 
-# We store the original path before we make any changes
-# so that sourcing this file can be idempotent.
-: "${ORIGINAL_PATH:="$PATH"}"
-PATH="$ORIGINAL_PATH"
-add_to_path() {
-    if [[ "$2" == "prepend" ]]; then
-        export PATH="$1:$PATH"
-    else
-        export PATH="$PATH:$1"
-    fi
-}
-add_to_path "$HOME/bin"                 prepend
-add_to_path "$HOME/bin/racket/bin"
-add_to_path "$HOME/.cabal/bin"          prepend
-add_to_path "/opt/google/appengine"     prepend
-add_to_path "$HOME/npm/bin"             prepend
-add_to_path "$HOME/bin/gradle/bin"
-add_to_path "$HOME/khan/devtools/arcanist/khan-bin"
-add_to_path "$HOME/khan/devtools/khan-linter/bin"
-add_to_path "$HOME/git/depot_tools"     prepend
+# Use vi-editing modde. Also note .inputrc has 'set editing-mode: vi'.
+#set -o vi
 
-if [[ -d '/home/wchargin/.stack/programs/x86_64-linux/ghc-7.10.3/bin/' ]]; then
-    add_to_path '/home/wchargin/.stack/programs/x86_64-linux/ghc-7.10.3/bin/' prepend
-fi
+# File containing bash aliases. Reloaded before each prompt.
+ALIASES_FILE="${HOME}/.bash_aliases"
 
-if [[ -d '/home/wchargin/bin/google-cloud-sdk' ]]; then
-    source '/home/wchargin/bin/google-cloud-sdk/path.bash.inc'
-    source '/home/wchargin/bin/google-cloud-sdk/completion.bash.inc'
-fi
-
-if [[ -d '/home/wchargin/bash_completions/' ]]; then
-    # look how trusting I am
-    source /home/wchargin/bash_completions/*
-fi
-
-if [[ -d ~/man ]]; then
-    export MANPATH=$MANPATH:~/man/
-fi
-
-# also note .inputrc contains 'set editing-mode: vi'
-set -o vi
-
-bakup () {
-    for arg in "$@"; do
-        cp -n "$arg" "${arg}.bak"
-    done
-}
-
-alias open=xdg-open
-alias here="open ."
-
-alias cp="cp -i"
-alias mv="mv -i"
-
-# Access schoolwork quickly by class.
-# Usage:
-#   go <class>
-# Example:
-#   go stat312
-GO="$HOME/Dropbox/school/16"
-function go() {
-    cd "$GO/$@"
-}
-function _go() # completion
-{
-    COMPREPLY=($( compgen -o dirnames -W "$(cat "$GO/current")" -- $2 ))
-}
-complete -F _go go
-
-# Edit the most recent notes file for this week.
-# If no such file exists, edit a new one with today's date.
-#
-# Usage:
-#   notes
-#   notes --today
-notes() {
-    if [[ -d "notes" ]]; then
-        cd notes
-    fi
-
-    local format='%Y%m%d'
-    local prefix="notes_"
-    local suffix=".tex"
-
-    local notes_file="${prefix}$(date +"$format")${suffix}"
-    local current_day_of_week="$(date +'%w')"   # 1 = Monday; see 'man date'
-    local seconds_per_day=86400
-    local initial_date="$(date +'%s')"          # current (starting) epoch time
-    for i in $(seq 1 "$current_day_of_week"); do
-        # i = number of days ago (we count backwards in time)
-        local target_date="$(( initial_date - seconds_per_day * (i - 1) ))"
-        local infix="$(date --date="@$target_date" +"$format")"
-        local candidate_file="${prefix}${infix}${suffix}"
-        if [[ -f "$candidate_file" ]]; then
-            notes_file="$candidate_file"
-            break
-        fi
-    done
-
-    # Pre-populate a notes template if the file is new.
-    # Include a jump marker (<++>) to allow easy cursor positioning.
-    if [[ ! -e "$notes_file" ]]; then
-        local formatted_date="$(date +'%e %B %Y' | sed -e 's/^ //' -e 's/ /~/')"
-        # yes I know what a heredoc is, but this requires less escaping
-        {
-            echo '\documentclass{article}'
-            echo
-            echo '\usepackage{wcsetup}'
-            echo '\classnotes{'"$formatted_date"'}'
-            echo
-            echo '\begin{document}'
-            echo
-            echo '\maketitle'
-            echo
-            echo '<++>'
-            echo
-            echo '\end{document}'
-        } >> "$notes_file"
-    fi
-    $EDITOR "$notes_file"
-}
-
-# base_PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\]'
-PROMPT_COMMAND+='setup_git_vars; '
+_last_exit_status=0
+_last_alias_status=0
+PROMPT_COMMAND='_last_exit_status=$?; history -a; setup_git_vars; source_aliases; '
 PS1=
 PS1+=$'\n'
-PS1+='$(format_exit_code $?)'
+PS1+='$(print_aliases_status)'
+PS1+='$(print_exit_status ${_last_exit_status})'
+PS1+='$(print_time)'
 PS1+='$(print_git_branch)'
-PS1+='$(vim_check)'
-PS1+='${debian_chroot:+($debian_chroot)}'
+PS1+='$(print_virtualenv)'
+PS1+=$'\n'
 PS1+='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w'
 PS1+=$'\n'
 PS1+='\$\[\033[00m\] '
-vim_check='if env | grep -q '^VIMRUNTIME'; then tput bold; echo -n "[vim|$SHLVL] "; tput sgr0; fi'
-format_exit_code() {
+
+print_aliases_status() {
+    if [ "${_last_alias_status}" -ne 0 ]; then
+        # (extra \r is so that bash doesn't eat the trailing newline)
+        printf '%sWarning:%s Failed to load aliases (status: %s).\n\r' \
+            "$(tput setaf 1)" "$(tput sgr0)" "${_last_alias_status}"
+    fi
+}
+print_exit_status() {
     if [[ "$1" -ne 0 ]]; then
         tput bold
         tput setaf 1
-        printf '[✕ %3d] ' "$1"
+        printf '[✕ %3d]' "$1"
     else
         tput setaf 4
-        printf '[✓] '
+        printf '[✓]'
     fi
     tput sgr0
-}
-vim_check() {
-    if env | grep -q '^VIMRUNTIME'; then
-        tput bold
-        printf '[vim|%d] ' "$SHLVL"
-        tput sgr0
-    fi
 }
 setup_git_vars() {
     if BRANCH="$(git rev-parse --abbrev-ref HEAD 2>&1)"; then
         GIT=1
         FULL_SHA="$(git rev-parse HEAD)"
-        SHA="$(<<< "$FULL_SHA" head -c 10)"
+        SHA="$(<<< "${FULL_SHA}" head -c 10)"
         if ! git symbolic-ref HEAD 1>/dev/null 2>&1; then
             DETACHED=1
         else
@@ -185,103 +69,47 @@ setup_git_vars() {
         DETACHED=
     fi
 }
+print_time() {
+    printf ' %s%s%s' \
+        "$(tput setaf 6)" "$(date +'%H:%M:%S(%s)')" "$(tput sgr0)"
+}
 print_git_branch() {
-    if [[ "$GIT" -eq 1 ]]; then
-        tput bold
-        tput setaf 5
-        if [[ "$DETACHED" -eq 1 ]]; then
-            printf '[%s] ' "$SHA"
+    if [[ "${GIT}" -eq 1 ]]; then
+        tput setaf 4
+        if [[ "${DETACHED}" -eq 1 ]]; then
+            printf ' [%s]' "${SHA}"
         else
-            printf '[%s] ' "$BRANCH"
+            printf ' [%s|%s]' "${BRANCH}" "${SHA}"
         fi
         tput sgr0
     fi
 }
-
-if [[ -f '/home/wchargin/Documents/aufbau/extras/bash_complete/aufbau' ]]; then
-    source ~/Documents/aufbau/extras/bash_complete/aufbau
-fi
-
-go_to_khan_webapp() {
-    [[ $PWD =~ khan/webapp ]] || cd "$HOME/khan/webapp"
+print_virtualenv() {
+    if [ -n "${VIRTUAL_ENV}" ]; then
+        tput setaf 6
+        printf ' %s(%s)%s' \
+            "$(tput setaf 6)" \
+            "$(basename "${VIRTUAL_ENV}")" \
+            "$(tput sgr0)" \
+            ;
+    fi
 }
-set_title() {
-    # http://askubuntu.com/a/22417
-    printf '\033]0;%s\007' "$1"
+source_aliases() {
+    _last_alias_status=0
+    ( source "${ALIASES_FILE}" ) || _last_alias_status=$?
+    if [ "${_last_alias_status}" -eq 0 ]; then
+        source "${ALIASES_FILE}"
+    fi
 }
-alias kw="go_to_khan_webapp"
-alias ds="set_title 'khan/webapp devshell'; go_to_khan_webapp && tools/devshell.py"
-alias ms="set_title 'khan/webapp server'; go_to_khan_webapp && make serve"
 
-alias py=python
-alias ipy=ipython
-
-alias phab='arc diff HEAD^'
-alias rephab='phab -m rebase'
+export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # default: find * -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null
 # we want to ignore node_modules as well
 export FZF_DEFAULT_COMMAND='{ git ls-tree -r --name-only HEAD || find * \( -path '\''*/\.*'\'' -o -path '\''node_modules/*'\'' \) -prune -o -type f -print -o -type l -print 2> /dev/null; }'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-
-mkcd() {
-    mkdir -p "$@" && cd "$@"
-}
-
-alias racket='rlwrap racket'
-alias sml='rlwrap sml'
-
-vi() {
-    # often I write "vi mfile" by mistake
-    if [[ "$1" =~ m.* ]]; then
-        local first="${1#m}"
-        shift
-        $EDITOR "$first" "$@"
-    else
-        $EDITOR "$@"
-    fi
-}
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
-
-s() {
-    cd "$HOME/sandbox"
-    if [[ $# -gt 0 ]]; then
-        mkcd "$@"
-    fi
-}
-_s() { # completion
-    COMPREPLY=($( compgen -o dirnames -W "$(cd "$HOME/sandbox/"; find * -maxdepth 0 -type d)" -- $2 ))
-}
-complete -F _s s
-
-alias h10='hoogle --count=10'
-
-colorgo() {
-    gnugo "$@" | runhaskell /home/wchargin/bin/ColorGo.hs
-}
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 
 export CLICOLOR=yesplz
-
-nth() {
-    if [[ $# -ne 1 ]]; then
-        printf >&2 'usage: nth <fieldno>\n'
-        return 1
-    fi
-    awk "{print \$$1}"
-}
-
-if [ -z "$ALREADY_AUTOCD" ]; then
-    export ALREADY_AUTOCD=1
-    #go_to_khan_webapp
-fi
-
-alias json='python -m json.tool'
-
-# OPAM configuration
-. /home/wchargin/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
 
 # Use a terminal with support for italic colors. If this creates
 # problems, run set_up_italics.
@@ -295,17 +123,4 @@ xterm-256color-italic|xterm with 256 colors and italic,
 EOF
 }
 
-rm() {
-    for arg in "$@"; do
-        if [[ "$arg" =~ (.*/)?.git/?$ ]]; then
-            printf "Refusing to rm %s; use 'command rm' if you really want to\n" "$arg"
-            return 99
-        fi
-    done
-    command rm "$@"
-}
-
-fopen() {
-    target="$(set -o pipefail; locate "$@" | fzf)" || return
-    open "$target"
-}
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

@@ -31,6 +31,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'scrooloose/syntastic'
     Plug 'scrooloose/nerdtree'
     Plug 'tpope/vim-unimpaired'
+    Plug 'tpope/vim-eunuch'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-fugitive'
     Plug 'junegunn/vim-easy-align'
@@ -44,7 +45,7 @@ if filereadable($HOME . '/.vim/autoload/plug.vim')
     Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
     Plug 'rust-lang/rust.vim', { 'for': 'rust' }
     Plug 'wchargin/vim-better-sml', { 'for': 'sml' }
-    Plug 'klen/python-mode',   { 'for': 'python' }
+    "Plug 'klen/python-mode',   { 'for': 'python' }
     Plug 'wchargin/vim-lilypond', { 'for': 'lilypond' }
     Plug 'wlangstroth/vim-racket'
     Plug 'epicoxymoron/Vim-MIXAL-Syntax'
@@ -84,6 +85,13 @@ let mapleader = ' '
 " }}}
 "
 " Configuration for some vim-plug plugins {{{
+"
+" tpope/vim-surround {{{
+    " Single ("s") and double ("d") smart quotes
+    " (like <C-K>'6, <C-K>"9).
+    let g:surround_115 = "‘\r’"
+    let g:surround_100 = "“\r”"
+" }}}
 " terryma/vim-multiple-cursors {{{
 let g:multi_cursor_exit_from_insert_mode = 0
 
@@ -345,7 +353,7 @@ vnoremap <Leader>f <Esc>:call FormatText()<CR>
 " Remove consecutive blank lines.
 " (Useful for cleaning up the results of pre-processing macro expansions,
 " e.g., after 'ghc -E Literate.lhs'.)
-command! Collapse %s/\n\n\n\+//g
+command! Collapse %s/\n\n\n\+/\r\r/g
 " }}}
 " Statusline setup {{{
 
@@ -630,7 +638,8 @@ nnoremap <Leader>gra oexec arc amend<ESC>
 nnoremap <Leader>grd oexec arc diff HEAD^<ESC>
 nnoremap <Leader>grD oexec arc diff HEAD^ --verbatim<ESC>
 nnoremap <Leader>grm m`Oexec git fetch origin && git merge origin/master && git submodule update --init --recursive<ESC>``
-nnoremap <Leader>grp oexec git push origin HEAD:refs/heads/<C-R>=system("git rev-parse --abbrev-ref HEAD")<CR><Esc>dd
+nnoremap <Leader>grP oexec git push origin HEAD:refs/heads/<C-R>=system("git rev-parse --abbrev-ref HEAD")<CR><Esc>dd
+nnoremap <Leader>grp oexec git push-to-target<CR><Esc>dd
 " }}}
 " Phabricator and Arcanist {{{
 call _ShellMap('nnoremap', '<Leader>ad', 'arc diff --preview<Space>')
@@ -721,6 +730,12 @@ function! FtpluginHaskell()
     " or explicit quantifiers (forall a. a -> a).
     syntax match hsCompositionDot /\m\%(\s\|(\)\zs\.\ze\%(\s\|)\)/ conceal cchar=∘
     syntax match hsLambda /\\/ conceal cchar=λ
+endfunction
+" }}}
+" Python {{{
+autocmd FileType python call FtpluginPython()
+function! FtpluginPython()
+    setlocal shiftwidth=2 tabstop=2 softtabstop=2
 endfunction
 " }}}
 " Scheme and Racket {{{
@@ -1057,6 +1072,10 @@ endfunction
 " }}}
 " JavaScript (especially with NPM and Webpack) {{{
 autocmd FileType javascript call FtpluginJavascript()
+autocmd FileType js setlocal filetype=javascript
+autocmd FileType ts setlocal filetype=typescript
+autocmd FileType typescript setlocal filetype=javascript
+autocmd BufRead,BufNewFile *.ts setlocal filetype=typescript
 function! FtpluginJavascript()
     " need to touch things when webpack-dev-server doesn't pick up hot updates
     nnoremap <buffer> <Leader>T :! touch %<CR><Space>

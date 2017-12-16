@@ -4,3 +4,7 @@
 *.swo
 *.swa
 .ropeproject
+
+.gradle
+.idea
+/*.iml
